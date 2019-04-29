@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="console" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+    <name>Console</name>
+    <description>Provides access to the Symphony core from the command line.</description>
+    <repo type="github">https://github.com/pointybeard/console</repo>
+    <url type="discuss">https://github.com/pointybeard/console</url>
+    <types>
+        <type>Utility</type>
+    </types>
+    <authors>
+        <author>
+            <name github="pointybeard" symphony="team">Alannah Kearney</name>
+            <website>http://alannahkearney.com</website>
+        </author>
+    </authors>
+    <releases>
+        <release version="1.0.0" date="2018-04-20" min="2.7">
+            - Added check to ensure Console extension is enabled before proceeding. Throws ConsoleException if it isn't enabled (Fixes #4).
+            - Added __toString() method and moved some code from display().
+            - Removed the login() method since original limitation introduced by Symphony::login() is gone.
+            - Simplified authentication prompt message.
+            - Ran php-cs-fixer over code base to ensure PSR2 compliant formatting.
+        </release>
+    </releases>
+</extension>

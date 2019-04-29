@@ -1,0 +1,86 @@
+<?php declare(strict_types=1);
+
+namespace Symphony\Console\Command\Console;
+
+use Symphony\Console as Console;
+use Symphony\Console\AbstractInputType as Type;
+
+class Hello extends Console\AbstractCommand {
+
+    public function __construct() {
+        parent::__construct(
+            "1.0.0",
+            "echoes all arguments.",
+            "symphony console hello -a 123 --bravo=456"
+        );
+    }
+
+    public function execute(Console\Interfaces\InputInterface $input) : bool
+    {
+        (new Console\Message)
+            ->message("Hello! Here are the arguments & options available")
+            ->foreground(Console\Message::FG_COLOUR_WHITE)
+            ->background(Console\Message::BG_COLOUR_BLUE)
+            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->display()
+        ;
+
+        print PHP_EOL;
+
+        $count = 0;
+        (new Console\Message("ARGUMENTS"))
+            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Console\Message::FG_COLOUR_GREEN)
+            ->display()
+        ;
+        foreach($input->getArguments() as $name => $value) {
+            (new Console\Message)
+                ->message(sprintf(
+                    " %d: %s => %s", $count, $name, $value
+                ))
+                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->display()
+            ;
+            $count++;
+        }
+        print PHP_EOL;
+
+        (new Console\Message("OPTIONS"))
+            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Console\Message::FG_COLOUR_GREEN)
+            ->display()
+        ;
+
+        foreach($input->getOptions() as $name => $value) {
+
+            $o = $input->getCollection()->findOption($name);
+
+            $name = $o instanceof Console\Input\InputTypeOption
+                ? $o->name()
+                : $name;
+
+            $long = $o instanceof Console\Input\InputTypeOption && $o->long() !== null
+                ? $o->long()
+                : null;
+
+            $args = [
+                strlen($name) > 1 ? '-' : '',
+                $name,
+                $long !== null ? " (--{$long}) " : ' ',
+                type_sensitive_strval($value)
+            ];
+
+            (new Console\Message)
+                ->message(vsprintf(
+                    " -%s%s%s=> %s", $args
+                ))
+                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->display()
+            ;
+        }
+
+        print PHP_EOL;
+
+        return true;
+    }
+}

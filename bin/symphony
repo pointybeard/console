@@ -1,0 +1,231 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+namespace Symphony\Console\Command\Console;
+
+use Symphony\Console as Console;
+use Symphony\Console\AbstractInputType as Type;
+
+/**
+ * Sets up the SymphonyCMS environment
+ */
+function console_bootstrap() {
+    define(
+        'DOCROOT',
+        // #6 - DOCROOT can be set via the SYMPHONY_DOCROOT environment, so we need to
+        // listen for that and use it instead
+        getenv('SYMPHONY_DOCROOT') != false
+            ? getenv('SYMPHONY_DOCROOT')
+            : realpath(dirname(__FILE__) . '/../../..')
+    );
+
+    // #6 - Make sure the DOCROOT folder seems okay
+    if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
+        throw new \Exception(sprintf(
+            "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
+            DOCROOT
+        ));
+
+    // #5 - make sure the composer autoload file exists
+    } elseif (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
+        throw new \Exception(
+            "The composer autoloader doesn't appear to exist. Did you run 'composer update' in the Console extension folder?"
+        );
+    }
+
+    define('DOMAIN', null);
+
+    // Emulate HTTP_HOST so defines.php doesn't throw a notice
+    putenv('HTTP_HOST=symphony.console');
+    $_SERVER['HTTP_HOST'] = getenv('HTTP_HOST');
+
+    // Include symphony autoloader:
+    require DOCROOT . '/vendor/autoload.php';
+
+    // Include the Console extension Composer autoloader
+    require realpath(__DIR__ . '/../vendor') . '/autoload.php';
+
+    // Include the symphony boot script:
+    require DOCROOT . '/symphony/lib/boot/bundle.php';
+}
+
+try {
+    console_bootstrap();
+    Console\Console::initialise();
+
+} catch (\Exception $ex) {
+    console_fatal_error($ex->getMessage());
+}
+
+try {
+    $input = new Console\Input\Argv;
+
+    class Symphony extends Console\AbstractCommand {
+        public function __construct() {
+            parent::__construct(
+                "1.0.0",
+                "Runs command provided via extension or workspace/bin",
+                "symphony --list" . PHP_EOL .
+                "  symphony -t 4141e465 console hello --usage" . PHP_EOL .
+                "  symphony -u fred console hello"
+            );
+        }
+
+        public function usage() : string
+        {
+            return "Usage: symphony [OPTION]... EXTENSION [COMMAND]...";
+        }
+
+        public function init() : bool
+        {
+            parent::init();
+            $this
+                // Help. This will override the help option set in AbstractCommand
+                ->addOption(
+                    'h',
+                    'help',
+                    Type::FLAG_OPTIONAL,
+                    "print this help",
+                    function (Type $input, Console\AbstractInput $context) {
+                        // Need a way to check if the EXTENSION and COMMAND were set
+                        // and then who called this. If it was core Symphony command
+                        // we should be letting it trickle through to the child
+                        // command rather than displaying the Symphony command
+                        // help messaage.
+                        if (
+                            $context->getArgument('extension') !== null &&
+                            $context->getArgument('command') !== null &&
+                            static::class == 'Symphony\\Console\\Command\\Console\\Symphony'
+                        ) {
+                            return;
+                        }
+
+                        (new Console\Message)
+                            ->message((string)$this)
+                            ->foreground(Console\Message::FG_COLOUR_GREEN)
+                            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                            ->display()
+                        ;
+                        exit;
+                    }, false, true
+                )
+                // Version. This will override the version option set in AbstractCommand
+                ->addOption(
+                    'V',
+                    'version',
+                    Type::FLAG_OPTIONAL,
+                    "display the version of command and exit",
+                    function (Type $input, Console\AbstractInput $context) {
+                        if (
+                            $context->getArgument('extension') !== null &&
+                            $context->getArgument('command') !== null &&
+                            static::class == 'Symphony\\Console\\Command\\Console\\Symphony'
+                        ) {
+                            return;
+                        }
+
+                        (new Console\Message)
+                            ->message($this->name() . " version " . $this->version())
+                            ->foreground(Console\Message::FG_COLOUR_GREEN)
+                            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                            ->display()
+                        ;
+                        exit;
+                    }, false, true
+                )
+                ->addOption('t', 'token', Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
+                    "Use token to authenticate before running the command. Note some commands do not require authentication. Check individual command --usage for more info. Cannot set both --token (-t) and --user (-u).",
+                    function(Type $input, Console\AbstractInput $context) {
+                        // 1. Make sure that -u | --user isn't also set
+                        if($context->getOption('u') !== null) {
+                            throw new Console\Exceptions\ConsoleException("Does not make sense to set both -u (--user) and -t (--token) at the same time.");
+                        }
+
+                        // 2. Authenticate with Symphony
+                        if(!Console\Console::instance()->isLoggedIn()) {
+                            Console\Console::instance()->loginFromToken($context->getOption('t'));
+                            if (!Console\Console::instance()->isLoggedIn()) {
+                                throw new Console\Exceptions\AuthenticationFailedException("Token provided is not valid");
+                            }
+                        }
+
+                        return true;
+                    }
+                )
+                ->addOption('u', 'user', Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
+                    "Will authenticate using this user before running the comment. Password will be prompted for. Note some commands do not require authentication. Check individual command --usage for more info. Cannot set both --token (-t) and --user (-u).",
+                    function(Type $input, Console\AbstractInput $context) {
+
+                        // Authenticate with Symphony
+                        if(!Console\Console::instance()->isLoggedIn()) {
+                            $password = Console\Prompt::display("Enter Password", true);
+
+                            Console\Console::instance()->login($context->getOption('u'), $password);
+                            if (!Console\Console::instance()->isLoggedIn()) {
+                                throw new Console\Exceptions\ConsoleException("Username and/or password were incorrect.");
+                            }
+                        }
+
+                        return Console\Console::instance()->author();
+                    }
+                )
+            ;
+
+            return true;
+        }
+
+        public function execute(Console\Interfaces\InputInterface $input) : bool
+        {
+            // Use $input to figure out what command we are running. Both
+            // 'extension' and 'command' will be set
+            // Create the command and execute.
+            $command = Console\CommandFactory::fetch(
+                $input->getArgument('extension'),
+                $input->getArgument('command')
+            );
+
+            $input->bind(Console\InputCollection::merge(
+                $this->inputCollection(),
+                $command->inputCollection()
+            ));
+
+            if($command instanceof Console\Interfaces\AuthenticatedCommandInterface) {
+                $command->authenticate();
+            }
+
+            return $command->execute($input);
+        }
+    }
+
+    $command = Console\CommandFactory::fetch("console", "symphony");
+
+    $input->bind($command->inputCollection());
+
+    $command->execute($input);
+
+} catch(Console\Exceptions\RequiredInputMissingException | Console\Exceptions\RequiredInputMissingValueException $ex) {
+
+    (new Console\Message)
+        ->message(sprintf(
+"%s: %s",
+            strtolower($command->name()),
+            $ex->getMessage(),
+        ))
+        ->foreground(Console\Message::FG_COLOUR_RED)
+        ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+        ->display()
+    ;
+
+    (new Console\Message)
+        ->message(sprintf("%s
+
+Try --help for more options.",
+            $command->usage()
+        ))
+        ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+        ->display()
+    ;
+
+} catch(\Exception $ex) {
+    console_fatal_error($ex->getMessage());
+}

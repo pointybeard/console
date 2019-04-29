@@ -1,0 +1,34 @@
+{
+    "name": "pointybeard/symphonycms-console",
+    "version": "0.1.0",
+    "description": "SymphonyCMS Extensions that provides access to the Symphony core from the command line.",
+    "homepage": "https://github.com/pointybeard/console",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alannah Kearney",
+            "email": "hi@alannahkearney.com",
+            "homepage": "http://alannahkearney.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8"
+    },
+    "support": {
+      "issues": "https://github.com/pointybeard/console/issues",
+      "wiki": "https://github.com/pointybeard/console/wiki"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Symphony\\Console\\": "src/Console"
+        },
+        "files": [
+            "src/Includes/Functions.php"
+        ]
+    }
+}
