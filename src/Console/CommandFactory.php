@@ -16,11 +16,11 @@ class CommandFactory
 
     private static function getExtensionStatus($handle)
     {
-        return array_pop(
-            SymphonyExtensionManager::fetchStatus(
-                SymphonyExtensionManager::about($handle)
-            )
+        $status = SymphonyExtensionManager::fetchStatus(
+            SymphonyExtensionManager::about($handle)
         );
+
+        return array_pop($status);
     }
 
     public static function fetch(string $extension, string $command)
