@@ -19,6 +19,16 @@ function console_bootstrap() {
             : realpath(dirname(__FILE__) . '/../../..')
     );
 
+    // #5 - make sure the composer autoload file exists
+    if (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
+        throw new \Exception(
+            "The composer autoloader doesn't appear to exist. Did you run 'composer update' in the Console extension folder?"
+        );
+    }
+
+    // Include the Console extension Composer autoloader
+    require realpath(__DIR__ . '/../vendor') . '/autoload.php';
+
     // #6 - Make sure the DOCROOT folder seems okay
     if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
         throw new \Exception(sprintf(
@@ -26,11 +36,7 @@ function console_bootstrap() {
             DOCROOT
         ));
 
-    // #5 - make sure the composer autoload file exists
-    } elseif (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
-        throw new \Exception(
-            "The composer autoloader doesn't appear to exist. Did you run 'composer update' in the Console extension folder?"
-        );
+
     }
 
     define('DOMAIN', null);
@@ -38,12 +44,6 @@ function console_bootstrap() {
     // Emulate HTTP_HOST so defines.php doesn't throw a notice
     putenv('HTTP_HOST=symphony.console');
     $_SERVER['HTTP_HOST'] = getenv('HTTP_HOST');
-
-    // Include symphony autoloader:
-    require DOCROOT . '/vendor/autoload.php';
-
-    // Include the Console extension Composer autoloader
-    require realpath(__DIR__ . '/../vendor') . '/autoload.php';
 
     // Include the symphony boot script:
     require DOCROOT . '/symphony/lib/boot/bundle.php';
