@@ -2,6 +2,8 @@
 
 namespace Symphony\Console;
 
+use pointybeard\Helpers\Functions\Flags;
+
 abstract class AbstractInput implements Interfaces\InputInterface
 {
     protected $options = [];
@@ -29,10 +31,10 @@ abstract class AbstractInput implements Interfaces\InputInterface
     private static function checkRequiredAndRequiredValue(AbstractInputType $input, array $context) : void
     {
         if (!isset($context[$input->name()])) {
-            if (is_flag_set($input->flags(), AbstractInputType::FLAG_REQUIRED)) {
+            if (Flags\is_flag_set($input->flags(), AbstractInputType::FLAG_REQUIRED)) {
                 throw new Exceptions\RequiredInputMissingException($input);
             }
-        } elseif (is_flag_set($input->flags(), AbstractInputType::FLAG_VALUE_REQUIRED) && ($context[$input->name()] == null || $context[$input->name()] === true)) {
+        } elseif (Flags\is_flag_set($input->flags(), AbstractInputType::FLAG_VALUE_REQUIRED) && ($context[$input->name()] == null || $context[$input->name()] === true)) {
             throw new Exceptions\RequiredInputMissingValueException($input);
         }
     }

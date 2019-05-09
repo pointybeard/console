@@ -2,6 +2,7 @@
 
 namespace Symphony\Console\Input;
 
+use pointybeard\Helpers\Functions\Flags;
 use Symphony\Console as Console;
 
 class InputTypeOption extends Console\AbstractInputType
@@ -22,9 +23,9 @@ class InputTypeOption extends Console\AbstractInputType
     {
         $long = $this->long() !== null ? ', --' . $this->long() : null;
         if ($long != null) {
-            if (is_flag_set($this->flags(), self::FLAG_VALUE_REQUIRED)) {
+            if (Flags\is_flag_set($this->flags(), self::FLAG_VALUE_REQUIRED)) {
                 $long .= "=VALUE";
-            } elseif (is_flag_set($this->flags(), self::FLAG_VALUE_OPTIONAL)) {
+            } elseif (Flags\is_flag_set($this->flags(), self::FLAG_VALUE_OPTIONAL)) {
                 $long .= "[=VALUE]";
             }
         }

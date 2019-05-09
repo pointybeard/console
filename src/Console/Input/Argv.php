@@ -3,6 +3,7 @@
 namespace Symphony\Console\Input;
 
 use Symphony\Console as Console;
+use pointybeard\Helpers\Functions\Flags;
 
 class Argv extends Console\AbstractInput
 {
@@ -102,7 +103,7 @@ class Argv extends Console\AbstractInput
                     // This could also be an incrementing value
                     // and needs to be added up. E.g. e.g. -vvv or -v -v -v
                     // would be -v => 3
-                    if ($o instanceof Console\AbstractInputType && is_flag_set($o->flags(), Console\AbstractInputType::FLAG_TYPE_INCREMENTING)) {
+                    if ($o instanceof Console\AbstractInputType && Flags\is_flag_set($o->flags(), Console\AbstractInputType::FLAG_TYPE_INCREMENTING)) {
                         $value = isset($this->options[$name])
                             ? $this->options[$name] + 1
                             : 1
@@ -121,7 +122,7 @@ class Argv extends Console\AbstractInput
                         // rewind the iterator and set value to 'true'. Also,
                         // if this option doesn't expect a value (no FLAG_VALUE_REQUIRED or FLAG_VALUE_OPTIONAL flag set), don't capture the next value.
                         if (is_null($value) || self::isOption($value) || (
-                            !is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_REQUIRED) && !is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_OPTIONAL)
+                            !Flags\is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_REQUIRED) && !Flags\is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_OPTIONAL)
                         )) {
                             $value = true;
                             $it->seek($position);

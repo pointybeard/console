@@ -3,6 +3,7 @@
 namespace Symphony\Console;
 
 use Symphony\Console\AbstractInputType as Type;
+use pointybeard\Helpers\Functions\Flags;
 
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
@@ -227,8 +228,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
             $arguments[] = strtoupper(
                 // Wrap with square brackets if it's not required
-                is_flag_set(AbstractInputType::FLAG_OPTIONAL, $a->flags()) ||
-                !is_flag_set(AbstractInputType::FLAG_REQUIRED, $a->flags())
+                Flags\is_flag_set(AbstractInputType::FLAG_OPTIONAL, $a->flags()) ||
+                !Flags\is_flag_set(AbstractInputType::FLAG_REQUIRED, $a->flags())
                     ? "[{$a->name()}]"
                     : $a->name()
             );

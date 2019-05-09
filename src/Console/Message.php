@@ -2,6 +2,8 @@
 
 namespace Symphony\Console;
 
+use pointybeard\Helpers\Functions\Flags;
+
 class Message
 {
     private $message = null;
@@ -179,13 +181,13 @@ class Message
         return sprintf(
             '%s%s%s',
             (
-                is_flag_set($this->flags, self::FLAG_PREPEND_DATE)
+                Flags\is_flag_set($this->flags, self::FLAG_PREPEND_DATE)
                     ? self::now($this->dateFormat)
                     : null
             ),
             (string)$message,
             (
-                is_flag_set($this->flags, self::FLAG_APPEND_NEWLINE)
+                Flags\is_flag_set($this->flags, self::FLAG_APPEND_NEWLINE)
                     ? PHP_EOL
                     : null
             )

@@ -2,6 +2,9 @@
 
 namespace Symphony\Console;
 
+use pointybeard\Helpers\Functions\Flags;
+use pointybeard\Helpers\Functions\Cli;
+
 class Prompt
 {
     const FLAG_SILENT = 0x001;
@@ -25,9 +28,9 @@ class Prompt
      */
     public static function display($prompt, $flags = null, $default = null, \Closure $validator = null, $character = ":", $target=STDIN) : string
     {
-        $silent = is_flag_set($flags, self::FLAG_SILENT);
+        $silent = Flags\is_flag_set($flags, self::FLAG_SILENT);
 
-        if ($silent == true && !can_invoke_bash()) {
+        if ($silent == true && !Cli\can_invoke_bash()) {
             trigger_error("bash cannot be invoked from PHP so 'silent' flag cannot be used.", E_USER_NOTICE);
             $silent = false;
         }
