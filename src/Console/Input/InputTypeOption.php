@@ -3,6 +3,7 @@
 namespace Symphony\Console\Input;
 
 use pointybeard\Helpers\Functions\Flags;
+use pointybeard\Helpers\Functions\Strings;
 use Symphony\Console as Console;
 
 class InputTypeOption extends Console\AbstractInputType
@@ -31,7 +32,7 @@ class InputTypeOption extends Console\AbstractInputType
         }
         $first = str_pad(sprintf("-%s%s    ", $this->name(), $long), 36, ' ');
 
-        $second = utf8_wordwrap_array($this->description(), 40);
+        $second = Strings\utf8_wordwrap_array($this->description(), 40);
         for ($ii = 1; $ii < count($second); $ii++) {
             $second[$ii] = str_pad('', 38, ' ', \STR_PAD_LEFT) . $second[$ii];
         }

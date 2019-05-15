@@ -3,6 +3,7 @@
 namespace Symphony\Console\Input;
 
 use Symphony\Console as Console;
+use pointybeard\Helpers\Functions\Strings;
 
 class InputTypeArgument extends Console\AbstractInputType
 {
@@ -14,7 +15,7 @@ class InputTypeArgument extends Console\AbstractInputType
 
         $first = str_pad(sprintf("%s    ", $name), 20, ' ');
 
-        $second = utf8_wordwrap_array($this->description(), 40);
+        $second = Strings\utf8_wordwrap_array($this->description(), 40);
         for ($ii = 1; $ii < count($second); $ii++) {
             $second[$ii] = str_pad('', 22, ' ', \STR_PAD_LEFT) . $second[$ii];
         }

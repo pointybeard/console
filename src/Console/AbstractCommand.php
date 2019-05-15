@@ -4,6 +4,7 @@ namespace Symphony\Console;
 
 use Symphony\Console\AbstractInputType as Type;
 use pointybeard\Helpers\Functions\Flags;
+use pointybeard\Helpers\Functions\Strings;
 
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
@@ -52,11 +53,10 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 Type::FLAG_OPTIONAL,
                 "shows a list of commands available and exit",
                 function (Type $input, AbstractInput $context) {
-
                     $isExtensionSet = $context->getArgument('extension') !== null;
                     $commands = CommandAutoloader::fetch();
 
-                    if(empty($commands)) {
+                    if (empty($commands)) {
                         (new Message)
                             ->message("No commands could be found.")
                             ->flags(Message::FLAG_APPEND_NEWLINE)
@@ -80,11 +80,9 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
                     print PHP_EOL;
 
-                    foreach(CommandAutoloader::fetch() as $extension => $commands) {
-
-                        if(!$isExtensionSet || ($isExtensionSet && $context->getArgument('extension') == $extension)) {
-
-                            if(!$isExtensionSet) {
+                    foreach (CommandAutoloader::fetch() as $extension => $commands) {
+                        if (!$isExtensionSet || ($isExtensionSet && $context->getArgument('extension') == $extension)) {
+                            if (!$isExtensionSet) {
                                 (new Message)
                                     ->message("* {$extension}")
                                     ->flags(Message::FLAG_APPEND_NEWLINE)
@@ -93,7 +91,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                                 ;
                             }
 
-                            foreach($commands as $c) {
+                            foreach ($commands as $c) {
                                 (new Message)
                                     ->message("  - {$c}")
                                     ->flags(Message::FLAG_APPEND_NEWLINE)
@@ -103,7 +101,6 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
                             print PHP_EOL;
                         }
-
                     }
                     exit;
                 }
@@ -251,7 +248,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
         $args = [
             'command' => $this->name(),
             'version' => $this->version(),
-            'description' => trim(utf8_wordwrap($this->description())),
+            'description' => trim(Strings\utf8_wordwrap($this->description())),
             'usage' => $this->usage(),
             'arguments' => [],
             'options' => [],
