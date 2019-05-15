@@ -4,6 +4,7 @@ namespace Symphony\Console\Command\Console;
 
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
+use pointybeard\Helpers\Functions\Strings;
 
 class Hello extends Console\AbstractCommand {
 
@@ -67,7 +68,7 @@ class Hello extends Console\AbstractCommand {
                 strlen($name) > 1 ? '-' : '',
                 $name,
                 $long !== null ? " (--{$long}) " : ' ',
-                type_sensitive_strval($value)
+                Strings\type_sensitive_strval($value)
             ];
 
             (new Console\Message)
