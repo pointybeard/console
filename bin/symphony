@@ -35,8 +35,6 @@ function console_bootstrap() {
             "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
             DOCROOT
         ));
-
-
     }
 
     define('DOMAIN', null);
@@ -46,6 +44,7 @@ function console_bootstrap() {
     $_SERVER['HTTP_HOST'] = getenv('HTTP_HOST');
 
     // Include the symphony boot script:
+    require realpath(DOCROOT . '/vendor') . '/autoload.php';
     require DOCROOT . '/symphony/lib/boot/bundle.php';
 }
 
