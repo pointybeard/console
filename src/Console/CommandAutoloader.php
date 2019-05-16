@@ -2,6 +2,9 @@
 
 namespace Symphony\Console;
 
+use \ExtensionManager as SymphonyExtensionManager;
+use \Extension as SymphonyExtension;
+
 final class CommandAutoloader
 {
     private static $initialised = false;
@@ -14,65 +17,73 @@ final class CommandAutoloader
             return;
         }
 
-        // This custom autoloader checks the WORKSPACE/bin/ directory for a
-        // matching command. We *could* just use the PSR4 autoloader, however,
-        // this will allow autoloading from a dynamically set WORKSPACE folder
-        spl_autoload_register(function ($className) {
+        // This custom autoloader checks the WORKSPACE/commands/ directory for
+        // matching a command.
+        spl_autoload_register(function ($class) {
             if (!preg_match(
-                '/^Symphony\\\\Console\\\\Command\\\\Workspace\\\\(.+)$/i',
-                $className,
+                '/^Symphony\\\\Console\\\\Commands\\\\Workspace\\\\(.+)$/i',
+                $class,
                 $matches
             )) {
                 return;
             }
 
-            $file = WORKSPACE . "/bin/" . str_replace('\\', '/', $matches[1]);
+            $file = WORKSPACE . "/commands/" . str_replace('\\', '/', $matches[1]);
 
             if (is_readable($file)) {
                 require $file;
             }
         });
 
-        // Autoload commands in an extensions /bin folder
-        spl_autoload_register(function ($className) {
+        // Autoload commands in an extensions /commands folder
+        spl_autoload_register(function ($class) {
             if (!preg_match_all(
-                '/^Symphony\\\\Console\\\\Command\\\\([^\\\\]+)\\\\(.+)$/i',
-                $className,
+                '/^Symphony\\\\Console\\\\Commands\\\\([^\\\\]+)\\\\(.+)$/i',
+                $class,
                 $matches
             )) {
                 return;
             }
 
             $file = sprintf(
-                "%s/%s/bin/%s",
+                "%s/%s/commands/%s.php",
                 EXTENSIONS,
                 $matches[1][0],
                 $matches[2][0]
             );
 
             if (is_readable($file)) {
-                require $file;
+                require_once $file;
             }
         });
 
         // Autoloader for Extension driver classes
-        spl_autoload_register(function ($className) {
-            if (!preg_match_all('/^Extension_(.*)$/i', $className, $matches)) {
+        spl_autoload_register(function ($class) {
+            if (!preg_match('/^Extension_(.*)$/i', $class, $matches)) {
                 return;
             }
 
-            // Check if Extension is enabled
-            // @TODO
+            $extension = strtolower($matches[1]);
 
-            $file = sprintf(
-                "%s/%s/extension.driver.php",
+            // Check if Extension is enabled
+            if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
+                return;
+            }
+
+            $path = sprintf(
+                "%s/%s",
                 EXTENSIONS,
-                strtolower($matches[1][0])
+                $extension
             );
 
-            if (is_readable($file)) {
-                require $file;
+            if (is_readable("{$path}/extension.driver.php")) {
+                require_once "{$path}/extension.driver.php";
             }
+
+            if (is_readable("{$path}/vendor/autoload.php")) {
+                require_once "{$path}/vendor/autoload.php";
+            }
+
         });
 
         self::$initialised = true;
@@ -80,9 +91,10 @@ final class CommandAutoloader
 
     public static function fetch() : array
     {
+
         $commands = [];
 
-        $path = realpath(WORKSPACE . '/bin');
+        $path = realpath(WORKSPACE . '/commands');
 
         if ($path !== false && is_dir($path) && is_readable($path)) {
             foreach (new \DirectoryIterator($path) as $f) {
@@ -94,15 +106,15 @@ final class CommandAutoloader
         }
 
         foreach (new \DirectoryIterator(EXTENSIONS) as $d) {
-            if ($d->isDot() || !$d->isDir() || !is_dir($d->getPathname() . '/bin')) {
+            if ($d->isDot() || !$d->isDir() || !is_dir($d->getPathname() . '/commands')) {
                 continue;
             }
 
-            foreach (new \DirectoryIterator($d->getPathname() . '/bin') as $f) {
+            foreach (new \DirectoryIterator($d->getPathname() . '/commands') as $f) {
                 if (
                     $f->isDot() ||
                     !preg_match_all(
-                        '/extensions\/([^\/]+)\/bin\/([^\.\/]+)$/i',
+                        '/extensions\/([^\/]+)\/commands\/([^\.\/]+)\.php$/i',
                         $f->getPathname(),
                         $matches,
                         PREG_SET_ORDER
