@@ -26,7 +26,8 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "Symphony\\Console\\": "src/Console"
+            "Symphony\\Console\\": "src/Console",
+            "Symphony\\Console\\Commands\\Console\\": "commands"
         },
         "files": [
             "src/Includes/Functions.php"
