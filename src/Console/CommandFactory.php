@@ -7,7 +7,7 @@ use \Extension as SymphonyExtension;
 
 class CommandFactory
 {
-    const TEMPLATE_NAMESPACE = "\\Symphony\\Console\\Command\\%s\\";
+    private const TEMPLATE_NAMESPACE = "\\Symphony\\Console\\Commands\\%s\\%s";
 
     // Prevents this class from being instanciated
     private function __construct()
@@ -25,6 +25,7 @@ class CommandFactory
 
     public static function fetch(string $extension, string $command)
     {
+
         if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
             throw new Exceptions\ExtensionNotEnabledException(
                 $extension,
@@ -34,7 +35,13 @@ class CommandFactory
 
         CommandAutoloader::init();
 
-        $class = sprintf(self::TEMPLATE_NAMESPACE, $extension) . $command;
+         // Note it is important to capitalise the first character of both
+         // $extension and $command.
+        $class = sprintf(
+            self::TEMPLATE_NAMESPACE,
+            ucfirst($extension),
+            ucfirst($command)
+        );
 
         if (!class_exists($class)) {
             throw new Exceptions\CommandNotFoundException($extension, $command);
