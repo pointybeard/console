@@ -5,6 +5,7 @@ namespace Symphony\Console;
 use Symphony\Console\AbstractInputType as Type;
 use pointybeard\Helpers\Functions\Flags;
 use pointybeard\Helpers\Functions\Strings;
+use pointybeard\Helpers\Cli;
 
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
@@ -38,10 +39,9 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 Type::FLAG_OPTIONAL,
                 "print this help",
                 function (Type $input, AbstractInput $context) {
-                    (new Message)
+                    (new Cli\Message\Message)
                         ->message((string)$this)
-                        ->foreground(Message::FG_COLOUR_GREEN)
-                        ->flags(Message::FLAG_APPEND_NEWLINE)
+                        ->foreground(Cli\Colour\Colour::FG_GREEN)
                         ->display()
                     ;
                     exit;
@@ -57,24 +57,22 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                     $commands = CommandAutoloader::fetch();
 
                     if (empty($commands)) {
-                        (new Message)
+                        (new Cli\Message\Message)
                             ->message("No commands could be found.")
-                            ->flags(Message::FLAG_APPEND_NEWLINE)
-                            ->foreground(Message::FG_COLOUR_YELLOW)
+                            ->foreground(Cli\Colour\Colour::FG_YELLOW)
                             ->display()
                         ;
                         exit;
                     }
 
-                    (new Message)
+                    (new Cli\Message\Message)
                         ->message(sprintf(
                             "The following commands were located%s: ",
                             $isExtensionSet
                                 ? " for extension " . $context->getArgument('extension')
                                 : ''
                         ))
-                        ->flags(Message::FLAG_APPEND_NEWLINE)
-                        ->foreground(Message::FG_COLOUR_GREEN)
+                        ->foreground(Cli\Colour\Colour::FG_GREEN)
                         ->display()
                     ;
 
@@ -83,18 +81,16 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                     foreach (CommandAutoloader::fetch() as $extension => $commands) {
                         if (!$isExtensionSet || ($isExtensionSet && $context->getArgument('extension') == $extension)) {
                             if (!$isExtensionSet) {
-                                (new Message)
+                                (new Cli\Message\Message)
                                     ->message("* {$extension}")
-                                    ->flags(Message::FLAG_APPEND_NEWLINE)
-                                    ->foreground(Message::FG_COLOUR_GREEN)
+                                    ->foreground(Cli\Colour\Colour::FG_GREEN)
                                     ->display()
                                 ;
                             }
 
                             foreach ($commands as $c) {
-                                (new Message)
+                                (new Cli\Message\Message)
                                     ->message("  - {$c}")
-                                    ->flags(Message::FLAG_APPEND_NEWLINE)
                                     ->display()
                                 ;
                             }
@@ -111,10 +107,9 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 Type::FLAG_OPTIONAL,
                 "display the version of command and exit",
                 function (Type $input, AbstractInput $context) {
-                    (new Message)
+                    (new Cli\Message\Message)
                         ->message($this->name() . " version " . $this->version())
-                        ->foreground(Message::FG_COLOUR_GREEN)
-                        ->flags(Message::FLAG_APPEND_NEWLINE)
+                        ->foreground(Cli\Colour\Colour::FG_GREEN)
                         ->display()
                     ;
                     exit;
