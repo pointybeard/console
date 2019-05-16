@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Symphony\Console\Command\Console;
+namespace Symphony\Console\Commands\Console;
 
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
