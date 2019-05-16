@@ -5,6 +5,8 @@ namespace Symphony\Console\Command\Console;
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
 use pointybeard\Helpers\Functions\Strings;
+use pointybeard\Helpers\Cli\Message\Message;
+use pointybeard\Helpers\Cli\Colour\Colour;
 
 class Hello extends Console\AbstractCommand {
 
@@ -18,37 +20,33 @@ class Hello extends Console\AbstractCommand {
 
     public function execute(Console\Interfaces\InputInterface $input) : bool
     {
-        (new Console\Message)
+        (new Message)
             ->message("Hello! Here are the arguments & options available")
-            ->foreground(Console\Message::FG_COLOUR_WHITE)
-            ->background(Console\Message::BG_COLOUR_BLUE)
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Colour::FG_WHITE)
+            ->background(Colour::BG_BLUE)
             ->display()
         ;
 
         print PHP_EOL;
 
         $count = 0;
-        (new Console\Message("ARGUMENTS"))
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
-            ->foreground(Console\Message::FG_COLOUR_GREEN)
+        (new Message("ARGUMENTS"))
+            ->foreground(Colour::FG_GREEN)
             ->display()
         ;
         foreach($input->getArguments() as $name => $value) {
-            (new Console\Message)
+            (new Message)
                 ->message(sprintf(
                     " %d: %s => %s", $count, $name, $value
                 ))
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
                 ->display()
             ;
             $count++;
         }
         print PHP_EOL;
 
-        (new Console\Message("OPTIONS"))
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
-            ->foreground(Console\Message::FG_COLOUR_GREEN)
+        (new Message("OPTIONS"))
+            ->foreground(Colour::FG_GREEN)
             ->display()
         ;
 
@@ -71,11 +69,10 @@ class Hello extends Console\AbstractCommand {
                 Strings\type_sensitive_strval($value)
             ];
 
-            (new Console\Message)
+            (new Message)
                 ->message(vsprintf(
                     " -%s%s%s=> %s", $args
                 ))
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
                 ->display()
             ;
         }

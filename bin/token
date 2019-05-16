@@ -5,6 +5,9 @@ namespace Symphony\Console\Command\Console;
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
 
+use pointybeard\Helpers\Cli\Message\Message;
+use pointybeard\Helpers\Cli\Colour\Colour;
+
 use \Symphony, \AuthorManager;
 
 class Token extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface {
@@ -80,10 +83,9 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
         if($input->getOption('e') == true) {
             $author->set('auth_token_active', 'yes');
             $author->commit();
-            (new Console\Message)
+            (new Message)
                 ->message("SUCCESS: Auth token enabled for user '" . $author->get("username") . "'")
-                ->foreground(Console\Message::FG_COLOUR_GREEN)
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->foreground(Colour::FG_GREEN)
                 ->display()
             ;
         }
@@ -91,10 +93,9 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
         elseif($input->getOption('d') == true) {
             $author->set('auth_token_active', 'no');
             $author->commit();
-            (new Console\Message)
+            (new Message)
                 ->message("SUCCESS: Auth token disabled for user '" . $author->get("username") . "'")
-                ->foreground(Console\Message::FG_COLOUR_GREEN)
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->foreground(Colour::FG_GREEN)
                 ->display()
             ;
 
@@ -103,19 +104,17 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
         }
 
         if($author->get('auth_token_active') != 'yes') {
-            (new Console\Message)
+            (new Message)
                 ->message("Auth token is not enabled for author '".$author->get("username")."'. Exiting")
-                ->foreground(Console\Message::FG_COLOUR_YELLOW)
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->foreground(Colour::FG_YELLOW)
                 ->display()
             ;
             return true;
         }
 
-        (new Console\Message)
+        (new Message)
             ->message("Auth token for '" . $author->get("username") . "' is: " . Symphony::Author()->createAuthToken())
-            ->foreground(Console\Message::FG_COLOUR_GREEN)
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Colour::FG_GREEN)
             ->display()
         ;
 

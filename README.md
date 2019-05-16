@@ -94,6 +94,7 @@ Here is an example of a very basic Command called `test` placed in `workspace/bi
 namespace Symphony\Console\Command\Workspace;
 
 use Symphony\Console as Console;
+use pointybeard\Helpers\Cli;
 
 class Test extends Console\AbstractCommand
 {
@@ -107,9 +108,8 @@ class Test extends Console\AbstractCommand
 
     public function execute(Console\Interfaces\InputInterface $input) : bool
     {
-        (new Console\Message)
+        (new Cli\Message\Message)
             ->message("Greetings. This is the test command!")
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
             ->display()
         ;
 
@@ -133,6 +133,7 @@ Here is the same 'test' command from above, but this time it requires authentica
 namespace Symphony\Console\Command\Workspace;
 
 use Symphony\Console as Console;
+use pointybeard\Helpers\Cli;
 
 class Test extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
 {
@@ -148,9 +149,8 @@ class Test extends Console\AbstractCommand implements Console\Interfaces\Authent
 
     public function execute(Console\Interfaces\InputInterface $input) : bool
     {
-        (new Console\Message)
+        (new Cli\Message\Message)
             ->message("Greetings. This is the test command!")
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
             ->display()
         ;
 

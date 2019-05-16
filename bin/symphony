@@ -6,6 +6,10 @@ namespace Symphony\Console\Command\Console;
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
 
+use pointybeard\Helpers\Cli\Message\Message;
+use pointybeard\Helpers\Cli\Colour\Colour;
+use pointybeard\Helpers\Cli\Prompt\Prompt;
+
 /**
  * Sets up the SymphonyCMS environment
  */
@@ -99,10 +103,9 @@ try {
                             return;
                         }
 
-                        (new Console\Message)
+                        (new Message)
                             ->message((string)$this)
-                            ->foreground(Console\Message::FG_COLOUR_GREEN)
-                            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                            ->foreground(Colour::FG_GREEN)
                             ->display()
                         ;
                         exit;
@@ -123,10 +126,9 @@ try {
                             return;
                         }
 
-                        (new Console\Message)
+                        (new Message)
                             ->message($this->name() . " version " . $this->version())
-                            ->foreground(Console\Message::FG_COLOUR_GREEN)
-                            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                            ->foreground(Colour::FG_GREEN)
                             ->display()
                         ;
                         exit;
@@ -157,14 +159,20 @@ try {
 
                         // Authenticate with Symphony
                         if(!Console\Console::instance()->isLoggedIn()) {
-                            $password = Console\Prompt::display("Enter Password", true);
 
-                            Console\Console::instance()->login($context->getOption('u'), $password);
-                            if (!Console\Console::instance()->isLoggedIn()) {
-                                throw new Console\Exceptions\ConsoleException("Username and/or password were incorrect.");
-                            }
+                            $user = $context->getOption('u');
+                            $password = (new Prompt("Enter Password"))
+                                ->flags(Prompt::FLAG_SILENT)
+                                ->validator(function ($input) use ($user) {
+                                    Console\Console::instance()->login($user, $input);
+                                    if (!Console\Console::instance()->isLoggedIn()) {
+                                        throw new Console\Exceptions\ConsoleException("Username and/or password were incorrect.");
+                                    }
+                                    return true;
+                                })
+                                ->display()
+                            ;
                         }
-
                         return Console\Console::instance()->author();
                     }
                 )
@@ -204,24 +212,22 @@ try {
 
 } catch(Console\Exceptions\RequiredInputMissingException | Console\Exceptions\RequiredInputMissingValueException $ex) {
 
-    (new Console\Message)
+    (new Message)
         ->message(sprintf(
 "%s: %s",
             strtolower($command->name()),
             $ex->getMessage(),
         ))
-        ->foreground(Console\Message::FG_COLOUR_RED)
-        ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+        ->foreground(Colour::FG_RED)
         ->display()
     ;
 
-    (new Console\Message)
+    (new Message)
         ->message(sprintf("%s
 
 Try --help for more options.",
             $command->usage()
         ))
-        ->flags(Console\Message::FLAG_APPEND_NEWLINE)
         ->display()
     ;
 
