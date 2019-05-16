@@ -85,13 +85,13 @@ Some commands may require you are authenticated before you use them. To do this,
 
 To write a command, create a class that extends `Symphony\Console\AbstractCommand` and place it into `workspace/bin/`. Alternatively, put it into the `bin/` folder of any Extension.
 
-Any command you write must have a namespace starting with `Symphony\Console\Command\` followed by the name of your extension (e.g. `namespace Symphony\Console\Command\MyExtension`) or `workspace` (i.e. `namespace Symphony\Console\Command\Workspace`).
+Any command you write must have a namespace starting with `Symphony\Console\Commands\` followed by the name of your extension (e.g. `namespace Symphony\Console\Commands\MyExtension`) or `workspace` (i.e. `namespace Symphony\Console\Commands\Workspace`).
 
 Here is an example of a very basic Command called `test` placed in `workspace/bin/`:
 
 ```php
 <?php
-namespace Symphony\Console\Command\Workspace;
+namespace Symphony\Console\Commands\Workspace;
 
 use Symphony\Console as Console;
 use pointybeard\Helpers\Cli;
@@ -130,7 +130,7 @@ Here is the same 'test' command from above, but this time it requires authentica
 
 ```php
 <?php
-namespace Symphony\Console\Command\Workspace;
+namespace Symphony\Console\Commands\Workspace;
 
 use Symphony\Console as Console;
 use pointybeard\Helpers\Cli;
