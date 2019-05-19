@@ -1,15 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Symphony\Console\Input;
+namespace Symphony\Console\Input\Types;
 
 use pointybeard\Helpers\Functions\Flags;
 use pointybeard\Helpers\Functions\Strings;
 use Symphony\Console as Console;
 
-class InputTypeOption extends Console\AbstractInputType
+class Option extends Console\AbstractInputType
 {
-    protected static $type = "option";
-
     protected $long;
     protected $default;
 

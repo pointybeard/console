@@ -18,7 +18,7 @@ class Hello extends Console\AbstractCommand {
         );
     }
 
-    public function execute(Console\Interfaces\InputInterface $input) : bool
+    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
     {
         (new Message)
             ->message("Hello! Here are the arguments & options available")
@@ -54,11 +54,11 @@ class Hello extends Console\AbstractCommand {
 
             $o = $input->getCollection()->findOption($name);
 
-            $name = $o instanceof Console\Input\InputTypeOption
+            $name = $o instanceof Console\Input\Types\Option
                 ? $o->name()
                 : $name;
 
-            $long = $o instanceof Console\Input\InputTypeOption && $o->long() !== null
+            $long = $o instanceof Console\Input\Types\Option && $o->long() !== null
                 ? $o->long()
                 : null;
 

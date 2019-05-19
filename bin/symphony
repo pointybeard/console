@@ -59,13 +59,12 @@ try {
 }
 
 try {
-    $input = new Console\Input\Argv;
 
-    $command = Console\CommandFactory::fetch("console", "symphony");
+    $command = Console\CommandFactory::build("console", "symphony");
 
-    $input->bind($command->inputCollection());
-
-    $command->execute($input);
+    $command->execute(
+        Console\InputHandlerFactory::build("Argv", $command->inputCollection())
+    );
 
 } catch(Console\Exceptions\RequiredInputMissingException | Console\Exceptions\RequiredInputMissingValueException $ex) {
 

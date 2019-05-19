@@ -12,14 +12,10 @@ class Console extends \Symphony
     private $args;
 
     // Declared private to prevent cloning this class with clone operator
-    private function __clone()
-    {
-    }
+    private function __clone() {}
 
     // Declared private to prevent unserializing a copy of this class
-    private function __wakeup()
-    {
-    }
+    private function __wakeup() {}
 
     public static function initialise()
     {

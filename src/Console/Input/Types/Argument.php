@@ -1,14 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Symphony\Console\Input;
+namespace Symphony\Console\Input\Types;
 
 use Symphony\Console as Console;
 use pointybeard\Helpers\Functions\Strings;
 
-class InputTypeArgument extends Console\AbstractInputType
+class Argument extends Console\AbstractInputType
 {
-    protected static $type = "argument";
-
     public function __toString()
     {
         $name = strtoupper($this->name());

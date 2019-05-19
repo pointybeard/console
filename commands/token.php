@@ -33,7 +33,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
                 'author',
                 Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
                 "Operates on this author. If ommitted, authenticated user is assumed. Changing authors other than your own requires 'Developer' or 'Manager' user type.",
-                function(Type $input, Console\AbstractInput $context) {
+                function(Type $input, Console\AbstractInputHandler $context) {
                     $author = AuthorManager::fetchByUsername($context->getOption('a'));
                     if(!($author instanceof \Author)) {
                         throw new Console\Exceptions\ConsoleException(
@@ -48,7 +48,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
                 'enable',
                 Type::FLAG_OPTIONAL,
                 "enables authentication token for author",
-                function(Type $input, Console\AbstractInput $context) {
+                function(Type $input, Console\AbstractInputHandler $context) {
                     // 1. Make sure that -d | --disable isn't also set
                     if($context->getOption('d') !== null) {
                         throw new Console\Exceptions\ConsoleException("Does not make sense to set both -d (--disable) and -e (--enable) at the same time.");
@@ -67,7 +67,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
         return true;
     }
 
-    public function execute(Console\Interfaces\InputInterface $input) : bool
+    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
     {
 
         $author = $input->getOption('a') instanceof \Author

@@ -3,9 +3,9 @@
 namespace Symphony\Console\Interfaces;
 
 use Symphony\Console\AbstractInputType as AbstractInputType;
-use Symphony\Console\AbstractInput as AbstractInput;
+use Symphony\Console\AbstractInputHandler as AbstractInputHandler;
 
 interface InputValidatorInterface
 {
-    public function validate(AbstractInputType $input, AbstractInput $context);
+    public function validate(AbstractInputType $input, AbstractInputHandler $context);
 }

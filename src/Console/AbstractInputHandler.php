@@ -4,7 +4,7 @@ namespace Symphony\Console;
 
 use pointybeard\Helpers\Functions\Flags;
 
-abstract class AbstractInput implements Interfaces\InputInterface
+abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
 {
     protected $options = [];
     protected $arguments = [];
@@ -94,7 +94,7 @@ abstract class AbstractInput implements Interfaces\InputInterface
         return $this->arguments[$name] ?? null;
     }
 
-    public function getOption(string $name)
+    public function getOption(string $name) : ?string
     {
         return $this->options[$name] ?? null;
     }
@@ -109,7 +109,7 @@ abstract class AbstractInput implements Interfaces\InputInterface
         return $this->options;
     }
 
-    public function getCollection() : InputCollection
+    public function getCollection() : ?InputCollection
     {
         return $this->collection;
     }

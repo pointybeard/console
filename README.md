@@ -106,7 +106,7 @@ class Test extends Console\AbstractCommand
         );
     }
 
-    public function execute(Console\Interfaces\InputInterface $input) : bool
+    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
     {
         (new Cli\Message\Message)
             ->message("Greetings. This is the test command!")
@@ -147,7 +147,7 @@ class Test extends Console\AbstractCommand implements Console\Interfaces\Authent
         );
     }
 
-    public function execute(Console\Interfaces\InputInterface $input) : bool
+    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
     {
         (new Cli\Message\Message)
             ->message("Greetings. This is the test command!")

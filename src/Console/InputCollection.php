@@ -7,14 +7,13 @@ class InputCollection
     private $arguments = [];
     private $options = [];
 
-    public function __construct()
-    {
-    }
+    // Prevents the class from being instanciated
+    public function __construct() {}
 
     public function append(Interfaces\InputTypeInterface $input, bool $replace = false) : self
     {
         $class = new \ReflectionClass($input);
-        $this->{"append" . $class->getShortName()}($input, $replace);
+        $this->{"appendInputType" . $class->getShortName()}($input, $replace);
         return $this;
     }
 

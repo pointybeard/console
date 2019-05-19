@@ -4,7 +4,7 @@ namespace Symphony\Console\Interfaces;
 
 interface CommandInterface
 {
-    public function execute(InputInterface $input) : bool;
+    public function execute(InputHandlerInterface $input) : bool;
     public function init() : bool;
 
     public function addArgument(string $name, int $flags = null, string $description = null, object $validator = null, bool $replaceExisting = false) : object;

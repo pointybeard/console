@@ -38,7 +38,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'help',
                 Type::FLAG_OPTIONAL,
                 "print this help",
-                function (Type $input, AbstractInput $context) {
+                function (Type $input, AbstractInputHandler $context) {
                     (new Cli\Message\Message)
                         ->message((string)$this)
                         ->foreground(Cli\Colour\Colour::FG_GREEN)
@@ -52,7 +52,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'list',
                 Type::FLAG_OPTIONAL,
                 "shows a list of commands available and exit",
-                function (Type $input, AbstractInput $context) {
+                function (Type $input, AbstractInputHandler $context) {
                     $isExtensionSet = $context->getArgument('extension') !== null;
                     $commands = CommandAutoloader::fetch();
 
@@ -106,7 +106,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'version',
                 Type::FLAG_OPTIONAL,
                 "display the version of command and exit",
-                function (Type $input, AbstractInput $context) {
+                function (Type $input, AbstractInputHandler $context) {
                     (new Cli\Message\Message)
                         ->message($this->name() . " version " . $this->version())
                         ->foreground(Cli\Colour\Colour::FG_GREEN)
@@ -140,7 +140,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     public function addArgument(string $name, int $flags = null, string $description = null, object $validator = null, bool $replaceExisting = false) : object
     {
-        $this->inputCollection->append(new Input\InputTypeArgument(
+        $this->inputCollection->append(new Input\Types\Argument(
             $name,
             $flags,
             $description,
@@ -151,7 +151,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     public function addOption(string $name, string $long = null, int $flags = null, string $description = null, object $validator = null, $default = false, bool $replaceExisting = false) : object
     {
-        $this->inputCollection->append(new Input\InputTypeOption(
+        $this->inputCollection->append(new Input\Types\Option(
             $name,
             $long,
             $flags,
@@ -164,7 +164,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     public function addFlag(string $name, int $flags = null, string $description = null, $default = false) : object
     {
-        $this->inputCollection->append(new Input\InputTypeOption(
+        $this->inputCollection->append(new Input\Types\Option(
             $name,
             null,
             $flags,

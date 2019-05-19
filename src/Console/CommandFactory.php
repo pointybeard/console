@@ -5,14 +5,10 @@ namespace Symphony\Console;
 use \ExtensionManager as SymphonyExtensionManager;
 use \Extension as SymphonyExtension;
 
-class CommandFactory
+final class CommandFactory extends AbstractFactory
 {
-    private const TEMPLATE_NAMESPACE = "\\Symphony\\Console\\Commands\\%s\\%s";
-
-    // Prevents this class from being instanciated
-    private function __construct()
-    {
-    }
+    protected static $templateNamespace = __NAMESPACE__ . '\\Commands\\%s\\%s';
+    protected static $expectedClassType = __NAMESPACE__ . '\\Interfaces\\CommandInterface';
 
     private static function getExtensionStatus($handle)
     {
@@ -23,7 +19,7 @@ class CommandFactory
         return array_pop($status);
     }
 
-    public static function fetch(string $extension, string $command)
+    public static function build(string $extension, string $command)
     {
 
         if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
@@ -35,21 +31,14 @@ class CommandFactory
 
         CommandAutoloader::init();
 
-         // Note it is important to capitalise the first character of both
-         // $extension and $command.
-        $class = sprintf(
-            self::TEMPLATE_NAMESPACE,
-            ucfirst($extension),
-            ucfirst($command)
-        );
-
-        if (!class_exists($class)) {
-            throw new Exceptions\CommandNotFoundException($extension, $command);
-        }
-
-        $command = new $class;
-        if (!($command instanceof AbstractCommand)) {
-            throw new Exceptions\CommandInvalidException($extension, $command);
+        // Note it is important to capitalise the first character of both
+        // $extension and $command.
+        try{
+            $command = self::instanciate(
+                self::generateTargetClassName(ucfirst($extension), ucfirst($command))
+            );
+        } catch(\Exception $ex) {
+            throw new Exceptions\CommandUnableToLoadException($extension, $command, 0, $ex);
         }
 
         return $command;

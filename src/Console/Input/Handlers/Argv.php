@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Symphony\Console\Input;
+namespace Symphony\Console\Input\Handlers;
 
 use Symphony\Console as Console;
 use pointybeard\Helpers\Functions\Flags;
 
-class Argv extends Console\AbstractInput
+class Argv extends Console\AbstractInputHandler
 {
     private $argv = null;
 
