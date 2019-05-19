@@ -55,7 +55,7 @@ try {
     Console\Console::initialise();
 
 } catch (\Exception $ex) {
-    console_fatal_error($ex->getMessage());
+    Console\Functions\console_fatal_error($ex->getMessage());
 }
 
 try {
@@ -88,5 +88,5 @@ Try --help for more options.",
     ;
 
 } catch(\Exception $ex) {
-    console_fatal_error($ex->getMessage());
+    Console\Functions\console_fatal_error($ex->getMessage());
 }
