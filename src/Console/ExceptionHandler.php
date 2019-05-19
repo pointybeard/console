@@ -72,26 +72,10 @@ class ExceptionHandler extends GenericExceptionHandler
             }
         }
 
-        $queries = null;
-        if (is_object(\Symphony::Database())) {
-            $debug = \Symphony::Database()->debug();
-
-            if (is_countable($debug['query']) && count($debug['query']) > 0) {
-                foreach ($debug['query'] as $query) {
-                    $queries .= sprintf(
-                        '%s; [%01.4f]'."\n",
-                        preg_replace('/[\r\n\t]+/', ' ', $query['query']),
-                        (isset($query['time']) ? $query['time'] : null)
-                    );
-                }
-            }
-        }
-
         return sprintf(
             '%s: %s
 
 An error occurred in %s around line %d
-%s
 %s
 %s',
             ($e instanceof ErrorException ? GenericErrorHandler::$errorTypeStrings[$e->getSeverity()] : 'Fatal Error'),
@@ -99,8 +83,7 @@ An error occurred in %s around line %d
             $e->getFile(),
             $e->getLine(),
             $lines,
-            (!is_null($trace) ? "Backtrace".PHP_EOL."===========================".PHP_EOL.$trace.PHP_EOL : null),
-            (!is_null($queries) ? "Database Query Log".PHP_EOL."===========================".PHP_EOL.$queries.PHP_EOL : null)
+            (!is_null($trace) ? "Backtrace".PHP_EOL."===========================".PHP_EOL.$trace.PHP_EOL : null)
         );
     }
 }
