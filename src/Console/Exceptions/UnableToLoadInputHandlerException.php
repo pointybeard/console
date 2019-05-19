@@ -2,7 +2,7 @@
 
 namespace Symphony\Console\Exceptions;
 
-class UnableToLoadInputHandlerException extends ConsoleWithTraceException
+class UnableToLoadInputHandlerException extends ConsoleException
 {
     public function __construct(string $name, $code = 0, \Exception $previous = null)
     {

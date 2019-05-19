@@ -2,7 +2,7 @@
 
 namespace Symphony\Console\Exceptions;
 
-class UnableToLoadCommandException extends ConsoleWithTraceException
+class UnableToLoadCommandException extends ConsoleException
 {
     public function __construct(string $extension, string $command, $code = 0, \Exception $previous = null)
     {
