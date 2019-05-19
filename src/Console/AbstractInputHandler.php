@@ -94,7 +94,7 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
         return $this->arguments[$name] ?? null;
     }
 
-    public function getOption(string $name) : ?string
+    public function getOption(string $name)
     {
         return $this->options[$name] ?? null;
     }
