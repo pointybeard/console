@@ -38,7 +38,7 @@ final class CommandFactory extends AbstractFactory
                 self::generateTargetClassName(ucfirst($extension), ucfirst($command))
             );
         } catch(\Exception $ex) {
-            throw new Exceptions\CommandUnableToLoadException($extension, $command, 0, $ex);
+            throw new Exceptions\UnableToLoadCommandException($extension, $command, 0, $ex);
         }
 
         return $command;
