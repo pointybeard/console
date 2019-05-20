@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Symphony\Console\Traits;
 
-use Symphony\Console\Functions;
+use pointybeard\Helpers\Functions\Paths;
 
 trait hasReadableTraceExceptionTrait
 {
@@ -36,7 +36,7 @@ trait hasReadableTraceExceptionTrait
         foreach ($this->getTrace() as $line) {
             if (null !== $line['file']) {
                 try {
-                    $line['relative'] = Functions\get_relative_path(getcwd(), $line['file']);
+                    $line['relative'] = Paths\get_relative_path(getcwd(), $line['file']);
 
                     // Something when wrong. Just use the full file path instead
                 } catch (\Exception $ex) {
