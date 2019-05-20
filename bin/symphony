@@ -2,11 +2,12 @@
 <?php declare(strict_types=1);
 
 use Symphony\Console as Console;
-use Symphony\Console\AbstractInputType as Type;
 
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Prompt\Prompt;
+
+use pointybeard\Helpers\Cli\Input;
 
 /**
  * Sets up the SymphonyCMS environment
@@ -63,7 +64,7 @@ try {
     $command = Console\CommandFactory::build("console", "symphony");
 
     $command->execute(
-        Console\InputHandlerFactory::build("Argv", $command->inputCollection())
+        Input\InputHandlerFactory::build("Argv", $command->inputCollection())
     );
 
 } catch(Console\Exceptions\RequiredInputMissingException | Console\Exceptions\RequiredInputMissingValueException $ex) {

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Symphony\Console;
 
-use Symphony\Console\AbstractInputType as Type;
+use pointybeard\Helpers\Cli\Input;
+use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Functions\Flags;
 use pointybeard\Helpers\Functions\Strings;
 use pointybeard\Helpers\Cli;
@@ -27,7 +28,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
         $this->description = $description;
         $this->version = $version;
         $this->help = $help;
-        $this->inputCollection = new InputCollection();
+        $this->inputCollection = new Input\InputCollection();
 
         static::init();
     }
@@ -40,7 +41,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'help',
                 Type::FLAG_OPTIONAL,
                 'print this help',
-                function (Type $input, AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     (new Cli\Message\Message())
                         ->message((string) $this)
                         ->foreground(Cli\Colour\Colour::FG_GREEN)
@@ -54,7 +55,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'list',
                 Type::FLAG_OPTIONAL,
                 'shows a list of commands available and exit',
-                function (Type $input, AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     $isExtensionSet = null !== $context->getArgument('extension');
                     $commands = CommandAutoloader::fetch();
 
@@ -108,7 +109,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                 'version',
                 Type::FLAG_OPTIONAL,
                 'display the version of command and exit',
-                function (Type $input, AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     (new Cli\Message\Message())
                         ->message($this->name().' version '.$this->version())
                         ->foreground(Cli\Colour\Colour::FG_GREEN)
@@ -209,7 +210,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
         return array_pop(explode('\\', $class->getNamespaceName()));
     }
 
-    public function inputCollection(): InputCollection
+    public function inputCollection(): Input\InputCollection
     {
         return $this->inputCollection;
     }
@@ -226,8 +227,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
             $arguments[] = strtoupper(
                 // Wrap with square brackets if it's not required
-                Flags\is_flag_set(AbstractInputType::FLAG_OPTIONAL, $a->flags()) ||
-                !Flags\is_flag_set(AbstractInputType::FLAG_REQUIRED, $a->flags())
+                Flags\is_flag_set(Type::FLAG_OPTIONAL, $a->flags()) ||
+                !Flags\is_flag_set(Type::FLAG_REQUIRED, $a->flags())
                     ? "[{$a->name()}]"
                     : $a->name()
             );

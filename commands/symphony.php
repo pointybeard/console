@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Symphony\Console\Commands\Console;
 
 use Symphony\Console as Console;
-use Symphony\Console\AbstractInputType as Type;
+use pointybeard\Helpers\Cli\Input;
+use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Prompt\Prompt;
@@ -38,7 +39,7 @@ class Symphony extends Console\AbstractCommand
                 'help',
                 Type::FLAG_OPTIONAL,
                 'print this help',
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     // Need a way to check if the EXTENSION and COMMAND were set
                     // and then who called this. If it was core Symphony command
                     // we should be letting it trickle through to the child
@@ -68,7 +69,7 @@ class Symphony extends Console\AbstractCommand
                 'version',
                 Type::FLAG_OPTIONAL,
                 'display the version of command and exit',
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     if (
                         null !== $context->getArgument('extension') &&
                         null !== $context->getArgument('command') &&
@@ -92,7 +93,7 @@ class Symphony extends Console\AbstractCommand
                 'token',
                 Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
                 'Use token to authenticate before running the command. Note some commands do not require authentication. Check individual command --usage for more info. Cannot set both --token (-t) and --user (-u).',
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     // 1. Make sure that -u | --user isn't also set
                     if (null !== $context->getOption('u')) {
                         throw new Console\Exceptions\ConsoleException('Does not make sense to set both -u (--user) and -t (--token) at the same time.');
@@ -114,7 +115,7 @@ class Symphony extends Console\AbstractCommand
                 'user',
                 Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
                 'Will authenticate using this user before running the command. Password will be prompted for. Note some commands do not require authentication. Check individual command --usage for more info. Cannot set both --token (-t) and --user (-u).',
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     // Authenticate with Symphony
                     if (!Console\Console::instance()->isLoggedIn()) {
                         $user = $context->getOption('u');
@@ -140,7 +141,7 @@ class Symphony extends Console\AbstractCommand
         return true;
     }
 
-    public function execute(Console\Interfaces\InputHandlerInterface $input): bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
         // Use $input to figure out what command we are running. Both
         // 'extension' and 'command' will be set
@@ -150,7 +151,7 @@ class Symphony extends Console\AbstractCommand
             $input->getArgument('command')
         );
 
-        $input->bind(Console\InputCollection::merge(
+        $input->bind(Input\InputCollection::merge(
             $this->inputCollection(),
             $command->inputCollection()
         ));

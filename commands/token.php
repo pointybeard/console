@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Symphony\Console\Commands\Console;
 
 use Symphony\Console as Console;
-use Symphony\Console\AbstractInputType as Type;
+use pointybeard\Helpers\Cli\Input;
+use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use Symphony;
@@ -35,7 +36,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
                 'author',
                 Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
                 "Operates on this author. If ommitted, authenticated user is assumed. Changing authors other than your own requires 'Developer' or 'Manager' user type.",
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     $author = AuthorManager::fetchByUsername($context->getOption('a'));
                     if (!($author instanceof \Author)) {
                         throw new Console\Exceptions\ConsoleException(
@@ -52,7 +53,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
                 'enable',
                 Type::FLAG_OPTIONAL,
                 'enables authentication token for author',
-                function (Type $input, Console\AbstractInputHandler $context) {
+                function (Type $input, Input\AbstractInputHandler $context) {
                     // 1. Make sure that -d | --disable isn't also set
                     if (null !== $context->getOption('d')) {
                         throw new Console\Exceptions\ConsoleException('Does not make sense to set both -d (--disable) and -e (--enable) at the same time.');
@@ -75,7 +76,7 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
         return true;
     }
 
-    public function execute(Console\Interfaces\InputHandlerInterface $input): bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
         $author = $input->getOption('a') instanceof \Author
             ? $input->getOption('a')

@@ -8,6 +8,7 @@ use Symphony\Console as Console;
 use pointybeard\Helpers\Functions\Strings;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
+use pointybeard\Helpers\Cli\Input;
 
 class Hello extends Console\AbstractCommand
 {
@@ -20,7 +21,7 @@ class Hello extends Console\AbstractCommand
         );
     }
 
-    public function execute(Console\Interfaces\InputHandlerInterface $input): bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
         (new Message())
             ->message('Hello! Here are the arguments & options available')
@@ -58,11 +59,11 @@ class Hello extends Console\AbstractCommand
         foreach ($input->getOptions() as $name => $value) {
             $o = $input->getCollection()->findOption($name);
 
-            $name = $o instanceof Console\Input\Types\Option
+            $name = $o instanceof Input\Types\Option
                 ? $o->name()
                 : $name;
 
-            $long = $o instanceof Console\Input\Types\Option && null !== $o->long()
+            $long = $o instanceof Input\Types\Option && null !== $o->long()
                 ? $o->long()
                 : null;
 
