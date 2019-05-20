@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console\Interfaces;
 
@@ -13,5 +15,5 @@ interface InputTypeInterface
     const FLAG_TYPE_INT = 0x0200;
     const FLAG_TYPE_INCREMENTING = 0x0400;
 
-    public function getType() : string;
+    public function getType(): string;
 }

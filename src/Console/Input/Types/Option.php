@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console\Input\Types;
 
@@ -20,21 +22,21 @@ class Option extends Console\AbstractInputType
 
     public function __toString()
     {
-        $long = $this->long() !== null ? ', --' . $this->long() : null;
-        if ($long != null) {
+        $long = null !== $this->long() ? ', --'.$this->long() : null;
+        if (null != $long) {
             if (Flags\is_flag_set($this->flags(), self::FLAG_VALUE_REQUIRED)) {
-                $long .= "=VALUE";
+                $long .= '=VALUE';
             } elseif (Flags\is_flag_set($this->flags(), self::FLAG_VALUE_OPTIONAL)) {
-                $long .= "[=VALUE]";
+                $long .= '[=VALUE]';
             }
         }
-        $first = str_pad(sprintf("-%s%s    ", $this->name(), $long), 36, ' ');
+        $first = str_pad(sprintf('-%s%s    ', $this->name(), $long), 36, ' ');
 
         $second = Strings\utf8_wordwrap_array($this->description(), 40);
-        for ($ii = 1; $ii < count($second); $ii++) {
-            $second[$ii] = str_pad('', 38, ' ', \STR_PAD_LEFT) . $second[$ii];
+        for ($ii = 1; $ii < count($second); ++$ii) {
+            $second[$ii] = str_pad('', 38, ' ', \STR_PAD_LEFT).$second[$ii];
         }
 
-        return $first . implode($second, PHP_EOL);
+        return $first.implode($second, PHP_EOL);
     }
 }

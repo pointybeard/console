@@ -1,9 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
-
-use \ExtensionManager as SymphonyExtensionManager;
-use \Extension as SymphonyExtension;
 
 class Console extends \Symphony
 {
@@ -12,10 +11,14 @@ class Console extends \Symphony
     private $args;
 
     // Declared private to prevent cloning this class with clone operator
-    private function __clone() {}
+    private function __clone()
+    {
+    }
 
     // Declared private to prevent unserializing a copy of this class
-    private function __wakeup() {}
+    private function __wakeup()
+    {
+    }
 
     public static function initialise()
     {
@@ -23,7 +26,7 @@ class Console extends \Symphony
             throw new Exceptions\ConsoleAlreadyInitialisedException();
         }
 
-        self::$_instance = new self;
+        self::$_instance = new self();
 
         return self::instance();
     }
@@ -38,7 +41,6 @@ class Console extends \Symphony
         try {
             parent::__construct();
         } catch (\Exception $ex) {
-
             // We want to ignore the 'Headers Already Sent' exception but let
             // everhthing else through. Check the message and rethrow $ex
             // if its not.
@@ -56,16 +58,16 @@ class Console extends \Symphony
      * Convienence method for displaying an error (red text) and optionally
      * terminating the script.
      */
-    public static function displayError(string $message, bool $exit = true) : int
+    public static function displayError(string $message, bool $exit = true): int
     {
-        $result = (new Message)
+        $result = (new Message())
             ->message("ERROR: {$message}")
             ->foreground(Message::FG_COLOUR_RED)
             ->flags(Message::FLAG_APPEND_NEWLINE)
             ->display()
         ;
 
-        if ($exit == true) {
+        if (true == $exit) {
             exit(1);
         }
 
@@ -73,11 +75,11 @@ class Console extends \Symphony
     }
 
     /**
-     * Convienence method for displaying a warning (yellow text)
+     * Convienence method for displaying a warning (yellow text).
      */
-    public static function displayWarning(string $message) : int
+    public static function displayWarning(string $message): int
     {
-        $result = (new Message)
+        $result = (new Message())
             ->message("WARNING: {$message}")
             ->foreground(Message::FG_COLOUR_YELLOW)
             ->flags(Message::FLAG_APPEND_NEWLINE)

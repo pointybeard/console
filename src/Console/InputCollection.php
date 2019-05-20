@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
@@ -8,16 +10,19 @@ class InputCollection
     private $options = [];
 
     // Prevents the class from being instanciated
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
-    public function append(Interfaces\InputTypeInterface $input, bool $replace = false) : self
+    public function append(Interfaces\InputTypeInterface $input, bool $replace = false): self
     {
         $class = new \ReflectionClass($input);
-        $this->{"appendInputType" . $class->getShortName()}($input, $replace);
+        $this->{'appendInputType'.$class->getShortName()}($input, $replace);
+
         return $this;
     }
 
-    public function findArgument(string $name, ?int &$index=null) : ?AbstractInputType
+    public function findArgument(string $name, ?int &$index = null): ?AbstractInputType
     {
         foreach ($this->arguments as $index => $a) {
             if ($a->name() == $name) {
@@ -26,12 +31,13 @@ class InputCollection
         }
 
         $index = null;
+
         return null;
     }
 
-    public function findOption(string $name, ?int &$index=null) : ?AbstractInputType
+    public function findOption(string $name, ?int &$index = null): ?AbstractInputType
     {
-        $type = strlen($name) == 1 ? 'name' : 'long';
+        $type = 1 == strlen($name) ? 'name' : 'long';
 
         foreach ($this->options as $index => $o) {
             if ($o->$type() == $name) {
@@ -40,50 +46,51 @@ class InputCollection
         }
 
         $index = null;
+
         return null;
     }
 
-    private function appendInputTypeArgument(Interfaces\InputTypeInterface $argument, bool $replace = false) : void
+    private function appendInputTypeArgument(Interfaces\InputTypeInterface $argument, bool $replace = false): void
     {
-        if ($this->findArgument($argument->name(), $index) !== null && !$replace) {
+        if (null !== $this->findArgument($argument->name(), $index) && !$replace) {
             throw new Exceptions\ConsoleException("Argument {$argument->name()} already exists in collection");
         }
 
-        if ($replace == true && !is_null($index)) {
+        if (true == $replace && null !== $index) {
             $this->arguments[$index] = $argument;
         } else {
             $this->arguments[] = $argument;
         }
     }
 
-    private function appendInputTypeOption(Interfaces\InputTypeInterface $option, bool $replace = false) : void
+    private function appendInputTypeOption(Interfaces\InputTypeInterface $option, bool $replace = false): void
     {
-        if ($this->findOption($option->name(), $index) !== null && !$replace) {
+        if (null !== $this->findOption($option->name(), $index) && !$replace) {
             throw new Exceptions\ConsoleException("Option -{$option->name()} already exists in collection");
         }
-        if ($replace == true && !is_null($index)) {
+        if (true == $replace && null !== $index) {
             $this->options[$index] = $option;
         } else {
             $this->options[] = $option;
         }
     }
 
-    public function getArgumentsByIndex(int $index) : ?AbstractInputType
+    public function getArgumentsByIndex(int $index): ?AbstractInputType
     {
         return $this->arguments[$index];
     }
 
-    public function getArguments() : array
+    public function getArguments(): array
     {
         return $this->arguments;
     }
 
-    public function getOptions() : array
+    public function getOptions(): array
     {
         return $this->options;
     }
 
-    public static function merge(self ...$collections) : self
+    public static function merge(self ...$collections): self
     {
         $arguments = [];
         $options = [];
@@ -93,9 +100,9 @@ class InputCollection
             $options = array_merge($options, $c->getOptions());
         }
 
-        $mergedCollection = new self;
+        $mergedCollection = new self();
 
-        $it = new \AppendIterator;
+        $it = new \AppendIterator();
         $it->append(new \ArrayIterator($arguments));
         $it->append(new \ArrayIterator($options));
 

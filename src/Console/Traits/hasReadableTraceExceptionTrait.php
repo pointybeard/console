@@ -1,23 +1,25 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console\Traits;
+
 use Symphony\Console\Functions;
 
 trait hasReadableTraceExceptionTrait
 {
-    public function getReadableTrace() : ?string
+    public function getReadableTrace(): ?string
     {
         // Doesn't make sense for this trait to be included in
         // non-exception based classes, but we should check anyway.
-        if(!($this instanceof \Exception)) {
-            throw new \Exception("Can only call getReadableTrace() on an Exception");
-
+        if (!($this instanceof \Exception)) {
+            throw new \Exception('Can only call getReadableTrace() on an Exception');
         // Nothing in the trace
         } elseif (count($this->getTrace()) <= 0) {
             return null;
         }
 
-        $traceLineFormat = '[%s:%d] %s%s%s();' . PHP_EOL;
+        $traceLineFormat = '[%s:%d] %s%s%s();'.PHP_EOL;
 
         $trace = null;
 
@@ -28,16 +30,15 @@ trait hasReadableTraceExceptionTrait
             'type' => null,
             'function' => null,
             'file' => null,
-            'args' => []
+            'args' => [],
         ];
 
         foreach ($this->getTrace() as $line) {
-
-            if($line['file'] !== null) {
-                try{
+            if (null !== $line['file']) {
+                try {
                     $line['relative'] = Functions\get_relative_path(getcwd(), $line['file']);
 
-                // Something when wrong. Just use the full file path instead
+                    // Something when wrong. Just use the full file path instead
                 } catch (\Exception $ex) {
                     $line['relative'] = $line['file'];
                 }

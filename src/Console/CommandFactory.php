@@ -1,14 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
-use \ExtensionManager as SymphonyExtensionManager;
-use \Extension as SymphonyExtension;
+use ExtensionManager as SymphonyExtensionManager;
+use Extension as SymphonyExtension;
 
 final class CommandFactory extends AbstractFactory
 {
-    protected static $templateNamespace = __NAMESPACE__ . '\\Commands\\%s\\%s';
-    protected static $expectedClassType = __NAMESPACE__ . '\\Interfaces\\CommandInterface';
+    protected static $templateNamespace = __NAMESPACE__.'\\Commands\\%s\\%s';
+    protected static $expectedClassType = __NAMESPACE__.'\\Interfaces\\CommandInterface';
 
     private static function getExtensionStatus($handle)
     {
@@ -21,7 +23,6 @@ final class CommandFactory extends AbstractFactory
 
     public static function build(string $extension, string $command)
     {
-
         if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
             throw new Exceptions\ExtensionNotEnabledException(
                 $extension,
@@ -33,11 +34,11 @@ final class CommandFactory extends AbstractFactory
 
         // Note it is important to capitalise the first character of both
         // $extension and $command.
-        try{
+        try {
             $command = self::instanciate(
                 self::generateTargetClassName(ucfirst($extension), ucfirst($command))
             );
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             throw new Exceptions\UnableToLoadCommandException($extension, $command, 0, $ex);
         }
 

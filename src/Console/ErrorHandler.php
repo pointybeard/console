@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
@@ -9,8 +11,9 @@ class ErrorHandler extends GenericErrorHandler
 {
     /**
      * Whether the error handler is enabled or not, defaults to true.
-     * Setting to false will prevent any Symphony error handling from occurring
-     * @var boolean
+     * Setting to false will prevent any Symphony error handling from occurring.
+     *
+     * @var bool
      */
     public static $enabled = true;
 
@@ -20,7 +23,7 @@ class ErrorHandler extends GenericErrorHandler
      */
     public static function initialise(?\Log $Log = null)
     {
-        if (!is_null($Log)) {
+        if (null !== $Log) {
             self::$_Log = $Log;
         }
 
@@ -33,9 +36,9 @@ class ErrorHandler extends GenericErrorHandler
 
     /**
      * Determines if the error handler is enabled by checking that error_reporting
-     * is set in the php config and that $enabled is true
+     * is set in the php config and that $enabled is true.
      *
-     * @return boolean
+     * @return bool
      */
     public static function isEnabled()
     {
@@ -47,18 +50,20 @@ class ErrorHandler extends GenericErrorHandler
      * or `E_STRICT` before raising the error as an Exception. This allows all `E_WARNING`
      * to actually be captured by an Exception handler.
      *
-     * @param integer $code
-     *  The error code, one of the PHP error constants
+     * @param int    $code
+     *                        The error code, one of the PHP error constants
      * @param string $message
-     *  The message of the error, this will be written to the log and
-     *  displayed as the exception message
+     *                        The message of the error, this will be written to the log and
+     *                        displayed as the exception message
      * @param string $file
-     *  The file that holds the logic that caused the error. Defaults to null
-     * @param integer $line
-     *  The line where the error occurred.
+     *                        The file that holds the logic that caused the error. Defaults to null
+     * @param int    $line
+     *                        The line where the error occurred
+     *
      * @throws ErrorException
+     *
      * @return string
-     *  Usually a string of HTML that will displayed to a user
+     *                Usually a string of HTML that will displayed to a user
      */
     public static function handler($code, $message, $file = null, $line = null)
     {

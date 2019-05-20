@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
@@ -10,9 +12,9 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
     protected $arguments = [];
     protected $collection = null;
 
-    abstract protected function parse() : bool;
+    abstract protected function parse(): bool;
 
-    public function bind(InputCollection $inputCollection, bool $skipValidation=false) : bool
+    public function bind(InputCollection $inputCollection, bool $skipValidation = false): bool
     {
         // Do the binding stuff here
         $this->options = [];
@@ -21,27 +23,26 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
 
         $this->parse();
 
-        if ($skipValidation !== true) {
+        if (true !== $skipValidation) {
             $this->validate();
         }
 
         return true;
     }
 
-    private static function checkRequiredAndRequiredValue(AbstractInputType $input, array $context) : void
+    private static function checkRequiredAndRequiredValue(AbstractInputType $input, array $context): void
     {
         if (!isset($context[$input->name()])) {
             if (Flags\is_flag_set($input->flags(), AbstractInputType::FLAG_REQUIRED)) {
                 throw new Exceptions\RequiredInputMissingException($input);
             }
-        } elseif (Flags\is_flag_set($input->flags(), AbstractInputType::FLAG_VALUE_REQUIRED) && ($context[$input->name()] == null || $context[$input->name()] === true)) {
+        } elseif (Flags\is_flag_set($input->flags(), AbstractInputType::FLAG_VALUE_REQUIRED) && (null == $context[$input->name()] || true === $context[$input->name()])) {
             throw new Exceptions\RequiredInputMissingValueException($input);
         }
     }
 
-    public function validate() : void
+    public function validate(): void
     {
-
         // Do basic missing option and value checking here
         foreach ($this->collection->getOptions() as $input) {
             self::checkRequiredAndRequiredValue($input, $this->options);
@@ -54,7 +55,7 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
             if (!array_key_exists($o->name(), $this->options)) {
                 $result = $o->default();
             } else {
-                if ($o->validator() === null) {
+                if (null === $o->validator()) {
                     $result = $o->default();
                     break;
                 } elseif ($o->validator() instanceof \Closure) {
@@ -75,7 +76,7 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
         foreach ($this->collection->getArguments() as $a) {
             self::checkRequiredAndRequiredValue($a, $this->arguments);
 
-            if (isset($this->arguments[$a->name()]) && $a->validator() !== null) {
+            if (isset($this->arguments[$a->name()]) && null !== $a->validator()) {
                 if ($a->validator() instanceof \Closure) {
                     $validator = new Validator($a->validator());
                 } elseif ($a->validator() instanceof Validator) {
@@ -89,7 +90,7 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
         }
     }
 
-    public function getArgument(string $name) : ?string
+    public function getArgument(string $name): ?string
     {
         return $this->arguments[$name] ?? null;
     }
@@ -99,17 +100,17 @@ abstract class AbstractInputHandler implements Interfaces\InputHandlerInterface
         return $this->options[$name] ?? null;
     }
 
-    public function getArguments() : array
+    public function getArguments(): array
     {
         return $this->arguments;
     }
 
-    public function getOptions() : array
+    public function getOptions(): array
     {
         return $this->options;
     }
 
-    public function getCollection() : ?InputCollection
+    public function getCollection(): ?InputCollection
     {
         return $this->collection;
     }

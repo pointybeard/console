@@ -1,19 +1,19 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
-use \ExtensionManager as SymphonyExtensionManager;
-use \Extension as SymphonyExtension;
+use Extension as SymphonyExtension;
 
 final class CommandAutoloader
 {
     private static $initialised = false;
 
-    public static function init() : void
+    public static function init(): void
     {
-
         // Only allow this to be called once. It's okay to silently return.
-        if (self::$initialised == true) {
+        if (true == self::$initialised) {
             return;
         }
 
@@ -28,7 +28,7 @@ final class CommandAutoloader
                 return;
             }
 
-            $file = WORKSPACE . "/commands/" . str_replace('\\', '/', $matches[1]);
+            $file = WORKSPACE.'/commands/'.str_replace('\\', '/', $matches[1]);
 
             if (is_readable($file)) {
                 require $file;
@@ -46,7 +46,7 @@ final class CommandAutoloader
             }
 
             $file = sprintf(
-                "%s/%s/commands/%s.php",
+                '%s/%s/commands/%s.php',
                 EXTENSIONS,
                 $matches[1][0],
                 $matches[2][0]
@@ -71,7 +71,7 @@ final class CommandAutoloader
             }
 
             $path = sprintf(
-                "%s/%s",
+                '%s/%s',
                 EXTENSIONS,
                 $extension
             );
@@ -83,20 +83,18 @@ final class CommandAutoloader
             if (is_readable("{$path}/vendor/autoload.php")) {
                 require_once "{$path}/vendor/autoload.php";
             }
-
         });
 
         self::$initialised = true;
     }
 
-    public static function fetch() : array
+    public static function fetch(): array
     {
-
         $commands = [];
 
-        $path = realpath(WORKSPACE . '/commands');
+        $path = realpath(WORKSPACE.'/commands');
 
-        if ($path !== false && is_dir($path) && is_readable($path)) {
+        if (false !== $path && is_dir($path) && is_readable($path)) {
             foreach (new \DirectoryIterator($path) as $f) {
                 if ($f->isDot()) {
                     continue;
@@ -106,11 +104,11 @@ final class CommandAutoloader
         }
 
         foreach (new \DirectoryIterator(EXTENSIONS) as $d) {
-            if ($d->isDot() || !$d->isDir() || !is_dir($d->getPathname() . '/commands')) {
+            if ($d->isDot() || !$d->isDir() || !is_dir($d->getPathname().'/commands')) {
                 continue;
             }
 
-            foreach (new \DirectoryIterator($d->getPathname() . '/commands') as $f) {
+            foreach (new \DirectoryIterator($d->getPathname().'/commands') as $f) {
                 if (
                     $f->isDot() ||
                     !preg_match_all(
@@ -126,7 +124,7 @@ final class CommandAutoloader
                 list(, $extension, $command) = $matches[0];
 
                 // Skip over the core 'symphony' command
-                if ($extension == 'console' && $command == 'symphony') {
+                if ('console' == $extension && 'symphony' == $command) {
                     continue;
                 }
 

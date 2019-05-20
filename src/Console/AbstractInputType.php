@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
@@ -26,7 +28,7 @@ abstract class AbstractInputType implements Interfaces\InputTypeInterface
         return $this->$name;
     }
 
-    public function getType() : string
+    public function getType(): string
     {
         return strtolower((new \ReflectionClass(static::class))->getShortName());
     }

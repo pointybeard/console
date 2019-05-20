@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console;
 
@@ -11,7 +13,7 @@ class ExceptionHandler extends GenericExceptionHandler
     {
         self::$enabled = true;
 
-        if (!is_null($Log)) {
+        if (null !== $Log) {
             self::$_Log = $Log;
         }
 
@@ -26,7 +28,7 @@ class ExceptionHandler extends GenericExceptionHandler
     public static function handler($e)
     {
         try {
-            if (self::$enabled !== true) {
+            if (true !== self::$enabled) {
                 return;
             }
 
@@ -83,7 +85,7 @@ An error occurred in %s around line %d
             $e->getFile(),
             $e->getLine(),
             $lines,
-            (!is_null($trace) ? "Backtrace".PHP_EOL."===========================".PHP_EOL.$trace.PHP_EOL : null)
+            (null !== $trace ? 'Backtrace'.PHP_EOL.'==========================='.PHP_EOL.$trace.PHP_EOL : null)
         );
     }
 }

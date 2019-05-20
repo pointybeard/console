@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console\Exceptions;
 
-use \ExtensionManager as SymphonyExtensionManager;
-use \Extension as SymphonyExtension;
+use Extension as SymphonyExtension;
 
 class ExtensionNotEnabledException extends ConsoleException
 {
@@ -11,20 +12,20 @@ class ExtensionNotEnabledException extends ConsoleException
     {
         switch ($status) {
             case SymphonyExtension::EXTENSION_NOT_INSTALLED:
-                $message = "Did you install the %s extension?";
+                $message = 'Did you install the %s extension?';
                 break;
 
             case SymphonyExtension::EXTENSION_REQUIRES_UPDATE:
-                $message = "%s extension requires updating.";
+                $message = '%s extension requires updating.';
                 break;
 
             case SymphonyExtension::EXTENSION_NOT_COMPATIBLE:
-                $message = "%s extension is not compatible with this version of Symphony CMS.";
+                $message = '%s extension is not compatible with this version of Symphony CMS.';
                 break;
 
             case SymphonyExtension::EXTENSION_DISABLED:
             default:
-                $message = "Did you enable the %s extension?";
+                $message = 'Did you enable the %s extension?';
                 break;
         }
 

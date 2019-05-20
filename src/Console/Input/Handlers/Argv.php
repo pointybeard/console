@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Symphony\Console\Input\Handlers;
 
@@ -15,10 +17,9 @@ class Argv extends Console\AbstractInputHandler
 
     public function __construct(array $argv = null)
     {
-        $argv = is_null($argv)
-            ? $_SERVER['argv']
-            : $argv
-        ;
+        if (null === $argv) {
+            $argv = $_SERVER['argv'];
+        }
 
         // Remove the script name
         array_shift($argv);
@@ -27,9 +28,9 @@ class Argv extends Console\AbstractInputHandler
     }
 
     /**
-     * This will look for combined options, e.g -vlt and expand them to -v -l -t
+     * This will look for combined options, e.g -vlt and expand them to -v -l -t.
      */
-    protected static function expandOptions(array $args) : array
+    protected static function expandOptions(array $args): array
     {
         $result = [];
         foreach ($args as $a) {
@@ -40,11 +41,10 @@ class Argv extends Console\AbstractInputHandler
                     // it will mean it's a combination of flags. e.g.
                     // -vlt 12345 is the same as -v -l -t 12345
                     if (strlen($a) > 2) {
-
                         // Strip the leading hyphen (-)
                         $a = substr($a, 1);
 
-                        for ($ii = 0; $ii < strlen($a); $ii++) {
+                        for ($ii = 0; $ii < strlen($a); ++$ii) {
                             $result[] = "-{$a[$ii]}";
                         }
 
@@ -61,7 +61,7 @@ class Argv extends Console\AbstractInputHandler
         return $result;
     }
 
-    protected function parse() : bool
+    protected function parse(): bool
     {
         // So some parsing here.
         $it = new \ArrayIterator($this->argv);
@@ -75,8 +75,8 @@ class Argv extends Console\AbstractInputHandler
                 case self::OPTION_LONG:
                     $opt = substr($token, 2);
 
-                    if (strstr($opt, '=') !== false) {
-                        list($name, $value) = explode("=", $opt, 2);
+                    if (false !== strstr($opt, '=')) {
+                        list($name, $value) = explode('=', $opt, 2);
                     } else {
                         $name = $opt;
                         $value = true;
@@ -111,7 +111,6 @@ class Argv extends Console\AbstractInputHandler
 
                     // Not incrementing, so resume default behaviour
                     } else {
-
                         // We'll need to look ahead and see what the next value is.
                         // Ignore it if the next item is another option
                         // Advance the pointer to grab the next value
@@ -121,7 +120,7 @@ class Argv extends Console\AbstractInputHandler
                         // See if the next item is another option and of it is,
                         // rewind the iterator and set value to 'true'. Also,
                         // if this option doesn't expect a value (no FLAG_VALUE_REQUIRED or FLAG_VALUE_OPTIONAL flag set), don't capture the next value.
-                        if (is_null($value) || self::isOption($value) || (
+                        if (null === $value || self::isOption($value) || (
                             !Flags\is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_REQUIRED) && !Flags\is_flag_set($o->flags(), Console\AbstractInputType::FLAG_VALUE_OPTIONAL)
                         )) {
                             $value = true;
@@ -151,20 +150,20 @@ class Argv extends Console\AbstractInputHandler
                     break;
             }
             $it->next();
-            $position++;
+            ++$position;
         }
 
         return true;
     }
 
-    private static function isOption(string $value) : bool
+    private static function isOption(string $value): bool
     {
-        return ($value{0} == '-');
+        return '-' == $value[0];
     }
 
-    private static function findType(string $value) : string
+    private static function findType(string $value): string
     {
-        if (strpos($value, '--') === 0) {
+        if (0 === strpos($value, '--')) {
             return self::OPTION_LONG;
         } elseif (self::isOption($value)) {
             return self::OPTION_SHORT;
