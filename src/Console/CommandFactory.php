@@ -6,11 +6,19 @@ namespace Symphony\Console;
 
 use ExtensionManager as SymphonyExtensionManager;
 use Extension as SymphonyExtension;
+use pointybeard\Helpers\Foundation\Factory;
 
-final class CommandFactory extends AbstractFactory
+final class CommandFactory extends Factory\AbstractFactory
 {
-    protected static $templateNamespace = __NAMESPACE__.'\\Commands\\%s\\%s';
-    protected static $expectedClassType = __NAMESPACE__.'\\Interfaces\\CommandInterface';
+    public static function getTemplateNamespace(): string
+    {
+        return __NAMESPACE__.'\\Commands\\%s\\%s';
+    }
+
+    public static function getExpectedClassType(): ?string
+    {
+        return __NAMESPACE__.'\\Interfaces\\CommandInterface';
+    }
 
     private static function getExtensionStatus($handle)
     {
