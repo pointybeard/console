@@ -14,11 +14,15 @@ class Hello extends Console\AbstractCommand
 {
     public function __construct()
     {
-        parent::__construct(
-            '1.0.0',
-            'echoes all arguments.',
-            'symphony console hello -a 123 --bravo=456'
-        );
+        parent::__construct();
+        $this
+            ->description('echoes all arguments')
+            ->version('1.0.1')
+            ->example(
+                'symphony console hello -a 123 --bravo=456'
+            )
+            ->support("If you believe you have found a bug, please report it using the GitHub issue tracker at https://github.com/pointybeard/console/issues, or better yet, fork the library and submit a pull request.\r\n\r\nCopyright 2015-2019 Alannah Kearney. Use 'symphony -L' to see software licence information.\r\n")
+        ;
     }
 
     public function execute(Input\Interfaces\InputHandlerInterface $input): bool

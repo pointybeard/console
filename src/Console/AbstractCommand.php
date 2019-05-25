@@ -6,15 +6,16 @@ namespace Symphony\Console;
 
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
+use pointybeard\Helpers\Functions;
 use pointybeard\Helpers\Functions\Flags;
-use pointybeard\Helpers\Functions\Strings;
 use pointybeard\Helpers\Cli;
 
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
     private $description;
     private $version;
-    private $help;
+    private $example;
+    private $support;
 
     private $inputCollection;
 
@@ -23,12 +24,15 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
     const VERBOSITY_LEVEL_2 = 2;
     const VERBOSITY_LEVEL_3 = 3;
 
-    protected function __construct(string $version, string $description, string $help)
+    protected function __construct(string $version = null, string $description = null, string $example = null, string $support = null)
     {
-        $this->description = $description;
-        $this->version = $version;
-        $this->help = $help;
-        $this->inputCollection = new Input\InputCollection();
+        $this
+            ->description($description)
+            ->version($version)
+            ->example($example)
+            ->support($support)
+            ->inputCollection(new Input\InputCollection())
+        ;
 
         static::init();
     }
@@ -141,59 +145,60 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
         return true;
     }
 
-    public function addArgument(string $name, int $flags = null, string $description = null, object $validator = null, bool $replaceExisting = false): object
+    // public function addArgument(string $name, int $flags = null, string $description = null, object $validator = null, bool $replaceExisting = false): object
+    // {
+    //     $this->inputCollection->append(new Input\Types\Argument(
+    //         $name,
+    //         $flags,
+    //         $description,
+    //         $validator
+    //     ), $replaceExisting);
+    //
+    //     return $this;
+    // }
+    //
+    // public function addOption(string $name, string $long = null, int $flags = null, string $description = null, object $validator = null, $default = false, bool $replaceExisting = false): object
+    // {
+    //     $this->inputCollection->append(new Input\Types\Option(
+    //         $name,
+    //         $long,
+    //         $flags,
+    //         $description,
+    //         $validator,
+    //         $default
+    //     ), $replaceExisting);
+    //
+    //     return $this;
+    // }
+    //
+    // public function addFlag(string $name, int $flags = null, string $description = null, $default = false): object
+    // {
+    //     $this->inputCollection->append(new Input\Types\Option(
+    //         $name,
+    //         null,
+    //         $flags,
+    //         $description,
+    //         null,
+    //         $default
+    //     ));
+    //
+    //     return $this;
+    // }
+
+    public function __call($name, array $args = [])
     {
-        $this->inputCollection->append(new Input\Types\Argument(
-            $name,
-            $flags,
-            $description,
-            $validator
-        ), $replaceExisting);
+        if (empty($args)) {
+            return $this->$name;
+        }
+
+        $this->$name = $args[0];
 
         return $this;
     }
 
-    public function addOption(string $name, string $long = null, int $flags = null, string $description = null, object $validator = null, $default = false, bool $replaceExisting = false): object
+    public function __get($name)
     {
-        $this->inputCollection->append(new Input\Types\Option(
-            $name,
-            $long,
-            $flags,
-            $description,
-            $validator,
-            $default
-        ), $replaceExisting);
-
-        return $this;
-    }
-
-    public function addFlag(string $name, int $flags = null, string $description = null, $default = false): object
-    {
-        $this->inputCollection->append(new Input\Types\Option(
-            $name,
-            null,
-            $flags,
-            $description,
-            null,
-            $default
-        ));
-
-        return $this;
-    }
-
-    public function description(): string
-    {
-        return $this->description;
-    }
-
-    public function version(): string
-    {
-        return $this->version;
-    }
-
-    public function help(): string
-    {
-        return $this->help;
+        return $this->$name;
     }
 
     public function name(): string
@@ -210,81 +215,27 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
         return array_pop(explode('\\', $class->getNamespaceName()));
     }
 
-    public function inputCollection(): Input\InputCollection
-    {
-        return $this->inputCollection;
-    }
-
     public function usage(): string
     {
-        $arguments = [];
-        foreach ($this->inputCollection->getArguments() as $a) {
-            // We don't want the two core arguments to show up since they are
-            // are taken caare of a little further down.
-            if (in_array($a->name(), ['extension', 'command'])) {
-                continue;
-            }
-
-            $arguments[] = strtoupper(
-                // Wrap with square brackets if it's not required
-                Flags\is_flag_set(Type::FLAG_OPTIONAL, $a->flags()) ||
-                !Flags\is_flag_set(Type::FLAG_REQUIRED, $a->flags())
-                    ? "[{$a->name()}]"
-                    : $a->name()
-            );
-        }
-
-        $arguments = trim(implode($arguments, ' '));
-
-        return sprintf(
-            'Usage: symphony %s %s [OPTION]... %s%s',
-            strtolower($this->extension()),
-            strtolower($this->name()),
-            $arguments,
-            strlen($arguments) > 0 ? '...' : ''
+        return Functions\Cli\usage(
+            'symphony '.strtolower("{$this->extension()} {$this->name()}"),
+            $this->inputCollection
         );
     }
 
     public function __toString()
     {
-        $args = [
-            'command' => $this->name(),
-            'version' => $this->version(),
-            'description' => trim(Strings\utf8_wordwrap($this->description())),
-            'usage' => $this->usage(),
-            'arguments' => [],
-            'options' => [],
-            'examples' => $this->help(),
-        ];
-
-        $format = '%s %s, %s
-%s
-
-Mandatory values for long options are mandatory for short options too.
-
-Arguments:
-  %s
-
-Options:
-  %s
-
-Examples:
-
-  %s
-        ';
-
-        foreach ($this->inputCollection->getArguments() as $a) {
-            $args['arguments'][] = (string) $a;
-        }
-
-        foreach ($this->inputCollection->getOptions() as $o) {
-            $args['options'][] = (string) $o;
-        }
-
-        //var_dump($args['arguments']); die;
-        $args['arguments'] = implode($args['arguments'], PHP_EOL.'  ');
-        $args['options'] = implode($args['options'], PHP_EOL.'  ');
-
-        return vsprintf($format, $args);
+        return Functions\Cli\manpage(
+            $this->name(),
+            $this->version(),
+            $this->description(),
+            $this->inputCollection,
+            Colour::FG_GREEN,
+            Colour::FG_WHITE,
+            [
+                'Examples' => $this->example(),
+                'Support' => $this->support(),
+            ]
+        );
     }
 }

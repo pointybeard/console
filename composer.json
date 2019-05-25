@@ -14,8 +14,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "pointybeard/helpers": "~1.1",
-        "pointybeard/helpers-cli-input": "~1.0"
+        "pointybeard/helpers": "~1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^8"
@@ -29,9 +28,6 @@
         "psr-4": {
             "Symphony\\Console\\": "src/Console",
             "Symphony\\Console\\Commands\\Console\\": "commands"
-        },
-        "files": [
-            "src/Includes/Functions.php"
-        ]
+        }
     }
 }

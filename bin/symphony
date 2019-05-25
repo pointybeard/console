@@ -1,93 +1,68 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
+/**
+ * Set up the Symphony CMS environment
+ */
+define(
+    'DOCROOT',
+    // DOCROOT can be set via the SYMPHONY_DOCROOT environment, so we need to
+    // listen for that and use it instead
+    getenv('SYMPHONY_DOCROOT') != false
+        ? getenv('SYMPHONY_DOCROOT')
+        : realpath(dirname(__FILE__) . '/../../..')
+);
+
+define('DOMAIN', null);
+
+// Emulate HTTP_HOST so defines.php doesn't throw a notice
+putenv('HTTP_HOST=symphony.console');
+$_SERVER['HTTP_HOST'] = getenv('HTTP_HOST');
+
+// make sure the composer autoload file exists
+if (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
+    echo "The composer autoloader doesn't appear to exist. Did you run 'composer update' in the Console extension folder?";
+    exit(1);
+}
+
+// Include the Console extension Composer autoloader
+require realpath(__DIR__ . '/../vendor') . '/autoload.php';
+
 use Symphony\Console as Console;
 
+use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Prompt\Prompt;
+use pointybeard\Helpers\Functions\Cli;
 
-use pointybeard\Helpers\Cli\Input;
+try{
 
-/**
- * Sets up the SymphonyCMS environment
- */
-function console_bootstrap() {
-    define(
-        'DOCROOT',
-        // #6 - DOCROOT can be set via the SYMPHONY_DOCROOT environment, so we need to
-        // listen for that and use it instead
-        getenv('SYMPHONY_DOCROOT') != false
-            ? getenv('SYMPHONY_DOCROOT')
-            : realpath(dirname(__FILE__) . '/../../..')
-    );
-
-    // #5 - make sure the composer autoload file exists
-    if (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
-        throw new \Exception(
-            "The composer autoloader doesn't appear to exist. Did you run 'composer update' in the Console extension folder?"
-        );
-    }
-
-    // Include the Console extension Composer autoloader
-    require realpath(__DIR__ . '/../vendor') . '/autoload.php';
-
-    // #6 - Make sure the DOCROOT folder seems okay
+    // Make sure the DOCROOT folder seems okay
     if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
-        throw new \Exception(sprintf(
+        throw new Console\Exceptions\ConsoleException(sprintf(
             "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
             DOCROOT
         ));
     }
 
-    define('DOMAIN', null);
-
-    // Emulate HTTP_HOST so defines.php doesn't throw a notice
-    putenv('HTTP_HOST=symphony.console');
-    $_SERVER['HTTP_HOST'] = getenv('HTTP_HOST');
-
     // Include the symphony boot script:
     require realpath(DOCROOT . '/vendor') . '/autoload.php';
     require DOCROOT . '/symphony/lib/boot/bundle.php';
-}
 
-try {
-    console_bootstrap();
     Console\Console::initialise();
 
-} catch (\Exception $ex) {
-    Console\Functions\console_fatal_error($ex->getMessage());
-}
+    $command = Console\CommandFactory::build('console', 'symphony');
 
-try {
+    $command->execute(Input\InputHandlerFactory::build(
+        'Argv',
+        $command->inputCollection()
+    ));
 
-    $command = Console\CommandFactory::build("console", "symphony");
-
-    $command->execute(
-        Input\InputHandlerFactory::build("Argv", $command->inputCollection())
-    );
-
-} catch(Console\Exceptions\RequiredInputMissingException | Console\Exceptions\RequiredInputMissingValueException $ex) {
-
-    (new Message)
-        ->message(sprintf(
-"%s: %s",
-            strtolower($command->name()),
-            $ex->getMessage(),
-        ))
-        ->foreground(Colour::FG_RED)
-        ->display()
-    ;
-
-    (new Message)
-        ->message(sprintf("%s
-
-Try --help for more options.",
-            $command->usage()
-        ))
-        ->display()
-    ;
+} catch(Input\Exceptions\RequiredInputMissingException | Input\Exceptions\RequiredInputMissingValueException $ex) {
+    echo Colour::colourise("symphony: {$ex->getMessage()}", Colour::FG_RED).PHP_EOL . $command->usage().PHP_EOL.PHP_EOL.'Try `-h` for more options.'.PHP_EOL;
+    exit(1);
 
 } catch(\Exception $ex) {
-    Console\Functions\console_fatal_error($ex->getMessage());
+    Cli\display_error_and_exit($ex->getMessage(), 'Symphony Console Fatal Error');
 }

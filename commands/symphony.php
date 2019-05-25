@@ -15,13 +15,17 @@ class Symphony extends Console\AbstractCommand
 {
     public function __construct()
     {
-        parent::__construct(
-            '1.0.0',
-            'Runs command provided via extension or workspace',
-            'symphony --list'.PHP_EOL.
-            '  symphony -t 4141e465 console hello --usage'.PHP_EOL.
-            '  symphony -u fred console token -e'
-        );
+        parent::__construct();
+        $this
+            ->description('Runs command provided via extension or workspace')
+            ->version('1.0.1')
+            ->example(
+                'symphony --list'.PHP_EOL.
+                'symphony -t 4141e465 console hello --usage'.PHP_EOL.
+                'symphony -u fred console token -e'
+            )
+            ->support("If you believe you have found a bug, please report it using the GitHub issue tracker at https://github.com/pointybeard/console/issues, or better yet, fork the library and submit a pull request.\r\n\r\nCopyright 2015-2019 Alannah Kearney. Use 'symphony -L' to see software licence information.\r\n")
+        ;
     }
 
     public function usage(): string
