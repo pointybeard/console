@@ -5,10 +5,20 @@ declare(strict_types=1);
 namespace Symphony\Console;
 
 use Extension as SymphonyExtension;
+use ExtensionManager as SymphonyExtensionManager;
 
 final class CommandAutoloader
 {
     private static $initialised = false;
+
+    private static function getExtensionStatus($handle)
+    {
+        $status = SymphonyExtensionManager::fetchStatus(
+            SymphonyExtensionManager::about($handle)
+        );
+
+        return array_pop($status);
+    }
 
     public static function init(): void
     {
