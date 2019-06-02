@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Symphony\Console;
 
+use pointybeard\Helpers\Cli\Message;
+use pointybeard\Helpers\Cli\Colour;
+
 class Console extends \Symphony
 {
     const EXTENSION_HANDLE = 'console';
@@ -60,10 +63,9 @@ class Console extends \Symphony
      */
     public static function displayError(string $message, bool $exit = true): int
     {
-        $result = (new Message())
+        $result = (new Message\Message())
             ->message("ERROR: {$message}")
-            ->foreground(Message::FG_COLOUR_RED)
-            ->flags(Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Colour\Colour::FG_RED)
             ->display()
         ;
 
