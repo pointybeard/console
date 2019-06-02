@@ -28,6 +28,10 @@ if (!file_exists(realpath(__DIR__ . '/../vendor') . '/autoload.php')) {
 // Include the Console extension Composer autoloader
 require realpath(__DIR__ . '/../vendor') . '/autoload.php';
 
+/**
+ * Finished setting up Symphony environment. Now commence building
+ * the Console environment
+ */
 use Symphony\Console as Console;
 
 use pointybeard\Helpers\Cli\Input;
@@ -36,33 +40,32 @@ use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Prompt\Prompt;
 use pointybeard\Helpers\Functions\Cli;
 
+// Make sure the DOCROOT folder seems okay
+if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
+    throw new Console\Exceptions\ConsoleException(sprintf(
+        "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
+        DOCROOT
+    ));
+}
+
+// Include the symphony boot script:
+require realpath(DOCROOT . '/vendor') . '/autoload.php';
+require DOCROOT . '/symphony/lib/boot/bundle.php';
+
+Console\Console::initialise();
+$command = Console\CommandFactory::build('console', 'symphony');
+
 try{
-
-    // Make sure the DOCROOT folder seems okay
-    if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
-        throw new Console\Exceptions\ConsoleException(sprintf(
-            "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
-            DOCROOT
-        ));
-    }
-
-    // Include the symphony boot script:
-    require realpath(DOCROOT . '/vendor') . '/autoload.php';
-    require DOCROOT . '/symphony/lib/boot/bundle.php';
-
-    Console\Console::initialise();
-
-    $command = Console\CommandFactory::build('console', 'symphony');
-
+    // Important we use FLAG_VALIDATION_SKIP_UNRECOGNISED here because
+    // the sub-command won't have added it's own input collection. Not setting
+    // this flag will cause a UnrecognisedInputException to be thrown if there
+    // are any subcommand specific options or arguments
     $command->execute(Input\InputHandlerFactory::build(
-        'Argv',
-        $command->inputCollection()
+        'Argv', $command->inputCollection(),
+        $command->bindFlags()
     ));
 
 } catch(Input\Exceptions\RequiredInputMissingException | Input\Exceptions\RequiredInputMissingValueException $ex) {
     echo Colour::colourise("symphony: {$ex->getMessage()}", Colour::FG_RED).PHP_EOL . $command->usage().PHP_EOL.PHP_EOL.'Try `-h` for more options.'.PHP_EOL;
     exit(1);
-
-} catch(\Exception $ex) {
-    Cli\display_error_and_exit($ex->getMessage(), 'Symphony Console Fatal Error');
 }
