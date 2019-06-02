@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Symphony\Console;
 
 use pointybeard\Helpers\Cli\Input;
-use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Functions;
-use pointybeard\Helpers\Functions\Flags;
 use pointybeard\Helpers\Cli;
+use pointybeard\Helpers\Exceptions\ReadableTrace;
 
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
@@ -19,12 +18,14 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     private $inputCollection;
 
+    private $bindFlags;
+
     const VERBOSITY_LEVEL_0 = 0;
     const VERBOSITY_LEVEL_1 = 1;
     const VERBOSITY_LEVEL_2 = 2;
     const VERBOSITY_LEVEL_3 = 3;
 
-    protected function __construct(string $version = null, string $description = null, string $example = null, string $support = null)
+    protected function __construct(?string $version = null, ?string $description = null, ?string $example = null, ?string $support = null, ?int $bindFlags = null)
     {
         $this
             ->description($description)
@@ -32,161 +33,149 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
             ->example($example)
             ->support($support)
             ->inputCollection(new Input\InputCollection())
+            ->bindFlags($bindFlags)
         ;
 
         static::init();
     }
 
-    public function init(): bool
+    // Wrapper for InputCollecton::append() to avoid exposing $inputCollection
+    // since only this class should be able to manipulate it (hence why it is
+    // private)
+    protected function addInputToCollection(Input\Interfaces\InputTypeInterface $input, bool $replaceExisting = false, int $position = Input\InputCollection::POSITION_APPEND)
     {
-        $this
-            ->addOption(
-                'h',
-                'help',
-                Type::FLAG_OPTIONAL,
-                'print this help',
-                function (Type $input, Input\AbstractInputHandler $context) {
-                    (new Cli\Message\Message())
-                        ->message((string) $this)
-                        ->foreground(Cli\Colour\Colour::FG_GREEN)
-                        ->display()
-                    ;
-                    exit;
-                }
-            )
-            ->addOption(
-                'l',
-                'list',
-                Type::FLAG_OPTIONAL,
-                'shows a list of commands available and exit',
-                function (Type $input, Input\AbstractInputHandler $context) {
-                    $isExtensionSet = null !== $context->getArgument('extension');
-                    $commands = CommandAutoloader::fetch();
+        $this->inputCollection->add($input, $replaceExisting, $position);
 
-                    if (empty($commands)) {
-                        (new Cli\Message\Message())
-                            ->message('No commands could be found.')
-                            ->foreground(Cli\Colour\Colour::FG_YELLOW)
-                            ->display()
-                        ;
-                        exit;
-                    }
-
-                    (new Cli\Message\Message())
-                        ->message(sprintf(
-                            'The following commands were located%s: ',
-                            $isExtensionSet
-                                ? ' for extension '.$context->getArgument('extension')
-                                : ''
-                        ))
-                        ->foreground(Cli\Colour\Colour::FG_GREEN)
-                        ->display()
-                    ;
-
-                    echo PHP_EOL;
-
-                    foreach (CommandAutoloader::fetch() as $extension => $commands) {
-                        if (!$isExtensionSet || ($isExtensionSet && $context->getArgument('extension') == $extension)) {
-                            if (!$isExtensionSet) {
-                                (new Cli\Message\Message())
-                                    ->message("* {$extension}")
-                                    ->foreground(Cli\Colour\Colour::FG_GREEN)
-                                    ->display()
-                                ;
-                            }
-
-                            foreach ($commands as $c) {
-                                (new Cli\Message\Message())
-                                    ->message("  - {$c}")
-                                    ->display()
-                                ;
-                            }
-
-                            echo PHP_EOL;
-                        }
-                    }
-                    exit;
-                }
-            )
-            ->addOption(
-                'V',
-                'version',
-                Type::FLAG_OPTIONAL,
-                'display the version of command and exit',
-                function (Type $input, Input\AbstractInputHandler $context) {
-                    (new Cli\Message\Message())
-                        ->message($this->name().' version '.$this->version())
-                        ->foreground(Cli\Colour\Colour::FG_GREEN)
-                        ->display()
-                    ;
-                    exit;
-                }
-            )
-            ->addArgument(
-                'extension',
-                Type::FLAG_REQUIRED,
-                'name of the extension that contains the command to be run'
-            )
-            ->addArgument(
-                'command',
-                Type::FLAG_REQUIRED,
-                'name of command to run.'
-            )
-            ->addOption(
-                'v',
-                null,
-                Type::FLAG_OPTIONAL | Type::FLAG_TYPE_INCREMENTING,
-                'verbosity level. -v (errors only), -vv (warnings and errors), -vvv (everything).',
-                null,
-                self::VERBOSITY_LEVEL_0
-            )
-        ;
-
-        return true;
+        return $this;
     }
 
-    // public function addArgument(string $name, int $flags = null, string $description = null, object $validator = null, bool $replaceExisting = false): object
-    // {
-    //     $this->inputCollection->append(new Input\Types\Argument(
-    //         $name,
-    //         $flags,
-    //         $description,
-    //         $validator
-    //     ), $replaceExisting);
-    //
-    //     return $this;
-    // }
-    //
-    // public function addOption(string $name, string $long = null, int $flags = null, string $description = null, object $validator = null, $default = false, bool $replaceExisting = false): object
-    // {
-    //     $this->inputCollection->append(new Input\Types\Option(
-    //         $name,
-    //         $long,
-    //         $flags,
-    //         $description,
-    //         $validator,
-    //         $default
-    //     ), $replaceExisting);
-    //
-    //     return $this;
-    // }
-    //
-    // public function addFlag(string $name, int $flags = null, string $description = null, $default = false): object
-    // {
-    //     $this->inputCollection->append(new Input\Types\Option(
-    //         $name,
-    //         null,
-    //         $flags,
-    //         $description,
-    //         null,
-    //         $default
-    //     ));
-    //
-    //     return $this;
-    // }
+    public function init(): void
+    {
+        $this
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('LongOption')
+                    ->name('help')
+                    ->short('h')
+                    ->flags(Input\AbstractInputType::FLAG_OPTIONAL)
+                    ->description('print this help')
+                    ->validator(new Input\Validator(
+                        function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
+                            (new Cli\Message\Message())
+                                ->message((string) $this)
+                                ->foreground(Cli\Colour\Colour::FG_GREEN)
+                                ->display()
+                            ;
+                            exit;
+                        }
+                    ))
+            )
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('LongOption')
+                    ->name('list')
+                    ->short('l')
+                    ->flags(Input\AbstractInputType::FLAG_OPTIONAL)
+                    ->description('shows a list of commands available and exit')
+                    ->validator(new Input\Validator(
+                        function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
+                            $isExtensionSet = null !== $context->find('extension');
+                            $commands = CommandAutoloader::fetch();
+
+                            if (empty($commands)) {
+                                (new Cli\Message\Message())
+                                    ->message('No commands could be found.')
+                                    ->foreground(Cli\Colour\Colour::FG_YELLOW)
+                                    ->display()
+                                ;
+                                exit;
+                            }
+
+                            (new Cli\Message\Message())
+                                ->message(sprintf(
+                                    'The following commands were located%s: ',
+                                    $isExtensionSet
+                                        ? ' for extension '.$context->find('extension')
+                                        : ''
+                                ))
+                                ->foreground(Cli\Colour\Colour::FG_GREEN)
+                                ->display()
+                            ;
+
+                            echo PHP_EOL;
+
+                            foreach (CommandAutoloader::fetch() as $extension => $commands) {
+                                if (!$isExtensionSet || ($isExtensionSet && $context->find('extension') == $extension)) {
+                                    if (!$isExtensionSet) {
+                                        (new Cli\Message\Message())
+                                            ->message("* {$extension}")
+                                            ->foreground(Cli\Colour\Colour::FG_GREEN)
+                                            ->display()
+                                        ;
+                                    }
+
+                                    foreach ($commands as $c) {
+                                        (new Cli\Message\Message())
+                                            ->message("  - {$c}")
+                                            ->display()
+                                        ;
+                                    }
+
+                                    echo PHP_EOL;
+                                }
+                            }
+                            exit;
+                        }
+                    ))
+            )
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('LongOption')
+                    ->name('version')
+                    ->short('V')
+                    ->flags(Input\AbstractInputType::FLAG_OPTIONAL)
+                    ->description('display the version of command and exit')
+                    ->validator(new Input\Validator(
+                        function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
+                            (new Cli\Message\Message())
+                                ->message($this->name().' version '.$this->version())
+                                ->foreground(Cli\Colour\Colour::FG_GREEN)
+                                ->display()
+                            ;
+                            exit;
+                        }
+                    ))
+            )
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('Argument')
+                    ->name('extension')
+                    ->flags(Input\AbstractInputType::FLAG_REQUIRED)
+                    ->description('name of the extension that contains the command to be run')
+            )
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('Argument')
+                    ->name('command')
+                    ->flags(Input\AbstractInputType::FLAG_REQUIRED)
+                    ->description('name of command to run')
+            )
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('IncrementingFlag')
+                    ->name('v')
+                    ->flags(Input\AbstractInputType::FLAG_OPTIONAL | Input\AbstractInputType::FLAG_TYPE_INCREMENTING)
+                    ->description('verbosity level. -v (errors only), -vv (warnings and errors), -vvv (everything).')
+                    ->validator(new Input\Validator(
+                        function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
+                            // Make sure verbosity level never goes above 3
+                            return min(3, (int) $context->find('v'));
+                        }
+                    ))
+            )
+        ;
+    }
 
     public function __call($name, array $args = [])
     {
+        if (!property_exists(self::class, $name)) {
+            throw new ReadableTrace\ReadableTraceException("Property '{$name}' does not exist in class ".static::class);
+        }
+
         if (empty($args)) {
             return $this->$name;
         }
@@ -218,7 +207,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
     public function usage(): string
     {
         return Functions\Cli\usage(
-            'symphony '.strtolower("{$this->extension()} {$this->name()}"),
+            'symphony',
             $this->inputCollection
         );
     }
@@ -230,8 +219,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
             $this->version(),
             $this->description(),
             $this->inputCollection,
-            Colour::FG_GREEN,
-            Colour::FG_WHITE,
+            Cli\Colour\Colour::FG_GREEN,
+            Cli\Colour\Colour::FG_WHITE,
             [
                 'Examples' => $this->example(),
                 'Support' => $this->support(),
