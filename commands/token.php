@@ -20,114 +20,122 @@ class Token extends Console\AbstractCommand implements Console\Interfaces\Authen
     {
         parent::__construct();
         $this
-            ->description('generates, enables, or disabled author tokens')
-            ->version('1.0.1')
+            ->description('shows, enables, or disabled author tokens')
+            ->version('1.0.2')
             ->example(
-                'symphony -t 4141e465 console token -e'.PHP_EOL.
-                'symphony -t 4141e465 console token --author=fred'.PHP_EOL.
-                'symphony -u admin console token -a fred --disable'
+                'symphony -t 4141e465 console token enable'.PHP_EOL.
+                'symphony -t 4141e465 console token show fred'.PHP_EOL.
+                'symphony -u admin console token disable fred'
             )
-            ->support("If you believe you have found a bug, please report it using the GitHub issue tracker at https://github.com/pointybeard/console/issues, or better yet, fork the library and submit a pull request.\r\n\r\nCopyright 2015-2019 Alannah Kearney. Use 'symphony -L' to see software licence information.\r\n")
+            ->support("If you believe you have found a bug, please report it using the GitHub issue tracker at https://github.com/pointybeard/console/issues, or better yet, fork the library and submit a pull request.\r\n\r\nCopyright 2015-2019 Alannah Kearney. See ".realpath(__DIR__.'/../LICENCE')." for software licence information.\r\n")
         ;
     }
 
-    public function init(): bool
+    public function init(): void
     {
         parent::init();
+
         $this
-            ->addOption(
-                'a',
-                'author',
-                Type::FLAG_OPTIONAL | Type::FLAG_VALUE_REQUIRED,
-                "Operates on this author. If ommitted, authenticated user is assumed. Changing authors other than your own requires 'Developer' or 'Manager' user type.",
-                function (Type $input, Input\AbstractInputHandler $context) {
-                    $author = AuthorManager::fetchByUsername($context->getOption('a'));
-                    if (!($author instanceof \Author)) {
-                        throw new Console\Exceptions\ConsoleException(
-                            "User '".$context->getOption('a')."' does not exist."
-                        );
-                    }
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('Argument')
+                    ->name('action')
+                    ->flags(Input\AbstractInputType::FLAG_REQUIRED)
+                    ->description('can be enable, disable, or show')
+                    ->validator(
+                        function (Type $input, Input\AbstractInputHandler $context) {
+                            $action = strtolower($context->find('action'));
+                            if (!in_array($action, ['show', 'enable', 'disable'])) {
+                                throw new Console\Exceptions\ConsoleException('Supported ACTIONs are disable and enable.');
+                            }
 
-                    return $author;
-                },
-                null
+                            return $action;
+                        }
+                    )
             )
-            ->addOption(
-                'e',
-                'enable',
-                Type::FLAG_OPTIONAL,
-                'enables authentication token for author',
-                function (Type $input, Input\AbstractInputHandler $context) {
-                    // 1. Make sure that -d | --disable isn't also set
-                    if (null !== $context->getOption('d')) {
-                        throw new Console\Exceptions\ConsoleException('Does not make sense to set both -d (--disable) and -e (--enable) at the same time.');
-                    }
+            ->addInputToCollection(
+                Input\InputTypeFactory::build('Argument')
+                    ->name('author')
+                    ->flags(Input\AbstractInputType::FLAG_OPTIONAL)
+                    ->description('operates on this author. If ommitted, authenticated user is assumed. Changing authors other than then authenticated author requires \'Developer\' or \'Manager\' privileges')
+                    ->validator(
+                        function (Type $input, Input\AbstractInputHandler $context) {
+                            $author = AuthorManager::fetchByUsername($context->find('author'));
+                            if (!($author instanceof \Author)) {
+                                throw new Console\Exceptions\ConsoleException(
+                                    "Author '".$context->find('author')."' does not exist."
+                                );
+                            }
 
-                    return true;
-                },
-                false
-            )
-            ->addOption(
-                'd',
-                'disable',
-                Type::FLAG_OPTIONAL,
-                'disables authentication token for author',
-                null,
-                false
+                            return $author;
+                        }
+                    )
             )
         ;
+    }
 
-        return true;
+    private function setAuthTokenActive(\Author &$author, bool $value): void
+    {
+        // Check to see if token status matches $value and if so, return
+        if ($author->isTokenActive() == $value) {
+            return;
+        }
+        $author->set('auth_token_active', true === $value ? 'yes' : 'no');
+        $author->commit();
+    }
+
+    public function usage(): string
+    {
+        return 'Usage: symphony [OPTIONS]... console token [enable|disable|show] AUTHOR';
     }
 
     public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
-        $author = $input->getOption('a') instanceof \Author
-            ? $input->getOption('a')
-            : $input->getOption('u')
+        $author = $input->find('author') instanceof \Author
+            ? $input->find('author')
+            : Symphony::Author()
         ;
 
         // Check if the authenticated user has permissions
-        if (Symphony::Author()->get('id') != $author->get('id') && !Symphony::Author()->isDeveloper() && !Symphony::Author()->isManager()) {
-            throw new Console\Exceptions\AuthenticationFailedException('You must be developer or manager to change that author');
+        if (
+            Symphony::Author()->get('id') != $author->get('id') &&
+            (
+                !Symphony::Author()->isDeveloper() ||
+                !Symphony::Author()->isManager()
+            )
+        ) {
+            throw new Console\Exceptions\AuthenticationFailedException('Authenticated user must be developer or manager to change that author');
         }
 
-        if (true == $input->getOption('e')) {
-            $author->set('auth_token_active', 'yes');
-            $author->commit();
+        if ('enable' == $input->find('action') || 'disable' == $input->find('action')) {
+            $this->setAuthTokenActive(
+                $author,
+                'enable' == $input->find('action') ? true : false
+            );
+
             (new Message())
-                ->message("SUCCESS: Auth token enabled for user '".$author->get('username')."'")
+                ->message(sprintf("SUCCESS: Auth token %sd for user '%s'", $input->find('action'), $author->get('username')))
                 ->foreground(Colour::FG_GREEN)
                 ->display()
             ;
-        } elseif (true == $input->getOption('d')) {
-            $author->set('auth_token_active', 'no');
-            $author->commit();
-            (new Message())
-                ->message("SUCCESS: Auth token disabled for user '".$author->get('username')."'")
-                ->foreground(Colour::FG_GREEN)
-                ->display()
-            ;
-
-            // Now that the token is disabled, there is no point continuing
-            return true;
+        } elseif ('show' == $input->find('action')) {
+            if (!$author->isTokenActive()) {
+                (new Message())
+                    ->message("Auth token is not enabled for author '".$author->get('username')."'")
+                    ->foreground(Colour::FG_YELLOW)
+                    ->display()
+                ;
+            } else {
+                (new Message())
+                    ->message(sprintf(
+                        "Auth token for '%s' is: %s",
+                        $author->get('username'),
+                        $author->createAuthToken()
+                    ))
+                    ->foreground(Colour::FG_GREEN)
+                    ->display()
+                ;
+            }
         }
-
-        if ('yes' != $author->get('auth_token_active')) {
-            (new Message())
-                ->message("Auth token is not enabled for author '".$author->get('username')."'. Exiting")
-                ->foreground(Colour::FG_YELLOW)
-                ->display()
-            ;
-
-            return true;
-        }
-
-        (new Message())
-            ->message("Auth token for '".$author->get('username')."' is: ".Symphony::Author()->createAuthToken())
-            ->foreground(Colour::FG_GREEN)
-            ->display()
-        ;
 
         return true;
     }
