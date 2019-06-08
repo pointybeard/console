@@ -10,12 +10,12 @@ use pointybeard\Helpers\Foundation\Factory;
 
 final class CommandFactory extends Factory\AbstractFactory
 {
-    public static function getTemplateNamespace(): string
+    public function getTemplateNamespace(): string
     {
         return __NAMESPACE__.'\\Commands\\%s\\%s';
     }
 
-    public static function getExpectedClassType(): ?string
+    public function getExpectedClassType(): ?string
     {
         return __NAMESPACE__.'\\Interfaces\\CommandInterface';
     }
@@ -29,8 +29,14 @@ final class CommandFactory extends Factory\AbstractFactory
         return array_pop($status);
     }
 
-    public static function build(string $extension, string $command)
+    public static function build(string $extension, ...$arguments): object
     {
+
+        $factory = new self;
+
+        // We only need to care about the first item in $arguments
+        [$command] = $arguments;
+
         if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
             throw new Exceptions\ExtensionNotEnabledException(
                 $extension,
@@ -43,8 +49,8 @@ final class CommandFactory extends Factory\AbstractFactory
         // Note it is important to capitalise the first character of both
         // $extension and $command.
         try {
-            $command = self::instanciate(
-                self::generateTargetClassName(ucfirst($extension), ucfirst($command))
+            $command = $factory->instanciate(
+                $factory->generateTargetClassName(ucfirst($extension), ucfirst($command))
             );
         } catch (\Exception $ex) {
             throw new Exceptions\UnableToLoadCommandException($extension, $command, 0, $ex);
