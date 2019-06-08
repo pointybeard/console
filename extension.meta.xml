@@ -14,12 +14,9 @@
         </author>
     </authors>
     <releases>
-        <release version="1.0.0" date="2018-04-20" min="2.7">
-            - Added check to ensure Console extension is enabled before proceeding. Throws ConsoleException if it isn't enabled (Fixes #4).
-            - Added __toString() method and moved some code from display().
-            - Removed the login() method since original limitation introduced by Symphony::login() is gone.
-            - Simplified authentication prompt message.
-            - Ran php-cs-fixer over code base to ensure PSR2 compliant formatting.
+        <release version="1.1.0" date="2019-06-02" min="2.7">
+        </release>
+        <release version="0.1.0" date="2018-04-20" min="2.7">
         </release>
     </releases>
 </extension>

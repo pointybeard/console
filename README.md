@@ -1,14 +1,13 @@
 # Console Extension for Symphony CMS
 
--   Version: 0.1.0
--   Date: April 29 2018
+-   Version: 1.1.0
+-   Date: June 08 2019
 -   [Release notes](https://github.com/pointybeard/console/blob/master/CHANGELOG.md)
 -   [GitHub repository](https://github.com/pointybeard/console)
 
-The Symphony Console extension provides access to the Symphony core from the command line.
+A [Symphony CMS](http://getsymphony.com) extension that provides access to the Symphony core from the command-line.
 
-Developers can include commands in their extensions, allowing for operations not suited
-to a web frontend. The command API gives straightforward access to the Symphony core framework, including database, config, authentication, and logs.
+Developers can include commands in their extensions, allowing for operations not suited to a web frontend. The command API gives straightforward access to the Symphony core framework, including database, config, authentication, and logs.
 
 ## Installation
 
@@ -57,25 +56,21 @@ Use the `EXTENSION` and `COMMAND` arguments to run a particular command. This ex
 
 To run the `hello` command use the following:
 
-    symphony console hello
+    bin/symphony console hello --nope
 
 You should see output like this:
 
     Hello! Here are the arguments & options available
 
     ARGUMENTS
-     0: extension => console
-     1: command => hello
+     1: extension => console
+     2: command => hello
 
-    OPTIONS
-     -h (--help) => false
-     -l (--list) => false
-     -V (--version) => false
-     -v => 0
-     -q (--quiet) => false
-     -t (--token) => false
-     -u (--user) => false
+    OPTIONS & FLAGS
+     -t, --token => true
 
+    UNRECOGNISED
+    nope => true
 
 ### Authentication
 
