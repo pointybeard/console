@@ -72,7 +72,6 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
             ->addInputToCollection(
                 Input\InputTypeFactory::build('LongOption')
                     ->name('list')
-                    ->short('l')
                     ->flags(Input\AbstractInputType::FLAG_OPTIONAL)
                     ->description('shows a list of commands available and exit')
                     ->validator(new Input\Validator(
@@ -91,8 +90,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
                             (new Cli\Message\Message())
                                 ->message(sprintf(
-                                    'The following commands were located%s: ',
-                                    $isExtensionSet
+                                    'The following commands are avaialble%s (try `--help` for individual command usage information): ',
+                                    $isExtensionSet && 'workspace' != $context->find('extension')
                                         ? ' for extension '.$context->find('extension')
                                         : ''
                                 ))
@@ -215,7 +214,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
     public function __toString()
     {
         return Functions\Cli\manpage(
-            $this->name(),
+            strtolower($this->name()),
             $this->version(),
             $this->description(),
             $this->inputCollection,

@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Symphony\Console;
 
-use Extension as SymphonyExtension;
-use ExtensionManager as SymphonyExtensionManager;
-
 final class CommandAutoloader
 {
     private static $initialised = false;
 
-    private static function getExtensionStatus($handle)
+    public static function getExtensionStatus($handle)
     {
-        $status = SymphonyExtensionManager::fetchStatus(
-            SymphonyExtensionManager::about($handle)
+        $status = \ExtensionManager::fetchStatus(
+            \ExtensionManager::about($handle)
         );
 
         return array_pop($status);
@@ -27,25 +24,8 @@ final class CommandAutoloader
             return;
         }
 
-        // This custom autoloader checks the WORKSPACE/commands/ directory for
-        // matching a command.
-        spl_autoload_register(function ($class) {
-            if (!preg_match(
-                '/^Symphony\\\\Console\\\\Commands\\\\Workspace\\\\(.+)$/i',
-                $class,
-                $matches
-            )) {
-                return;
-            }
-
-            $file = WORKSPACE.'/commands/'.str_replace('\\', '/', $matches[1]);
-
-            if (is_readable($file)) {
-                require $file;
-            }
-        });
-
-        // Autoload commands in an extensions /commands folder
+        // Autoload commands in an extensions /commands or workspace/commands
+        // folder
         spl_autoload_register(function ($class) {
             if (!preg_match_all(
                 '/^Symphony\\\\Console\\\\Commands\\\\([^\\\\]+)\\\\(.+)$/i',
@@ -55,12 +35,23 @@ final class CommandAutoloader
                 return;
             }
 
-            $file = sprintf(
-                '%s/%s/commands/%s.php',
-                EXTENSIONS,
-                $matches[1][0],
-                $matches[2][0]
-            );
+            $extension = $matches[1][0];
+            $command = $matches[2][0];
+
+            if (0 == strcasecmp($extension, 'workspace')) {
+                $file = sprintf(
+                    '%s/commands/%s.php',
+                    WORKSPACE,
+                    $command
+                );
+            } else {
+                $file = sprintf(
+                    '%s/%s/commands/%s.php',
+                    EXTENSIONS,
+                    $extension,
+                    $command
+                );
+            }
 
             if (is_readable($file)) {
                 require_once $file;
@@ -76,7 +67,7 @@ final class CommandAutoloader
             $extension = strtolower($matches[1]);
 
             // Check if Extension is enabled
-            if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
+            if (\Extension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
                 return;
             }
 
@@ -109,7 +100,7 @@ final class CommandAutoloader
                 if ($f->isDot()) {
                     continue;
                 }
-                $commands['workspace'][] = $f->getFilename();
+                $commands['workspace'][] = $f->getBasename('.php');
             }
         }
 

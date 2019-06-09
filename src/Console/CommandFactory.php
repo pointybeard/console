@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Symphony\Console;
 
-use ExtensionManager as SymphonyExtensionManager;
-use Extension as SymphonyExtension;
 use pointybeard\Helpers\Foundation\Factory;
 
 final class CommandFactory extends Factory\AbstractFactory
@@ -20,24 +18,14 @@ final class CommandFactory extends Factory\AbstractFactory
         return __NAMESPACE__.'\\Interfaces\\CommandInterface';
     }
 
-    private static function getExtensionStatus($handle)
-    {
-        $status = SymphonyExtensionManager::fetchStatus(
-            SymphonyExtensionManager::about($handle)
-        );
-
-        return array_pop($status);
-    }
-
     public static function build(string $extension, ...$arguments): object
     {
-
-        $factory = new self;
+        $factory = new self();
 
         // We only need to care about the first item in $arguments
         [$command] = $arguments;
 
-        if (SymphonyExtension::EXTENSION_ENABLED != $status = self::getExtensionStatus($extension)) {
+        if ('workspace' != $extension && \Extension::EXTENSION_ENABLED != $status = CommandAutoloader::getExtensionStatus($extension)) {
             throw new Exceptions\ExtensionNotEnabledException(
                 $extension,
                 $status
