@@ -1,6 +1,5 @@
 {
     "name": "pointybeard/symphonycms-console",
-    "version": "1.1.0",
     "description": "SymphonyCMS Extensions that provides access to the Symphony core from the command line.",
     "homepage": "https://github.com/pointybeard/console",
     "license": "MIT",
