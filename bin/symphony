@@ -42,10 +42,10 @@ use pointybeard\Helpers\Functions\Cli;
 
 // Make sure the DOCROOT folder seems okay
 if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
-    throw new Console\Exceptions\ConsoleException(sprintf(
+    Cli\display_error_and_exit(sprintf(
         "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
         DOCROOT
-    ));
+    ), 'Fatal Error');
 }
 
 // Include the symphony boot script:
