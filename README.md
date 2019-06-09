@@ -1,7 +1,7 @@
 # Console Extension for Symphony CMS
 
--   Version: 1.1.0
--   Date: June 08 2019
+-   Version: 1.0.0
+-   Date: June 09 2019
 -   [Release notes](https://github.com/pointybeard/console/blob/master/CHANGELOG.md)
 -   [GitHub repository](https://github.com/pointybeard/console)
 
@@ -44,13 +44,13 @@ or, if you followed the "Optional Setup" above, just
 
 The Console extension looks for commands in the `bin/` folder of extensions you have installed, and also in `workspace/bin/`. You can see a list of commands by running `symphony` without any arguments. A list like this will be displayed:
 
-    Below is a list of all available commands. (use --usage for details on
-    executing individual commands):
+    The following commands are avaialble (try `--help` for individual command usage information):
 
-       console/hello
-       console/token
+    * console
+      - token
+      - hello
 
-At any time you can use `--help` or `-h` to get help. If you have also specified a command (see below), you will get help for that particular command instead.
+At any time you can use `--help` to get detailed usage information. If you have also specified a command (see below), you will get help for that particular command instead.
 
 Use the `EXTENSION` and `COMMAND` arguments to run a particular command. This extension comes with two commands out of the box: `hello` and `token`.
 
@@ -67,7 +67,6 @@ You should see output like this:
      2: command => hello
 
     OPTIONS & FLAGS
-     -t, --token => true
 
     UNRECOGNISED
     nope => true
@@ -78,80 +77,98 @@ Some commands may require you are authenticated before you use them. To do this,
 
 ## Writing a custom command
 
-To write a command, create a class that extends `Symphony\Console\AbstractCommand` and place it into `workspace/bin/`. Alternatively, put it into the `bin/` folder of any Extension.
+To write a command, create a class that extends `Symphony\Console\AbstractCommand` and place it into `workspace/commands/`. Alternatively, put it into the `commands/` folder of any Extension.
 
 Any command you write must have a namespace starting with `Symphony\Console\Commands\` followed by the name of your extension (e.g. `namespace Symphony\Console\Commands\MyExtension`) or `workspace` (i.e. `namespace Symphony\Console\Commands\Workspace`).
 
-Here is an example of a very basic Command called `test` placed in `workspace/bin/`:
+Here is an example of a very basic Command called `test.php` placed in `workspace/commands/`:
 
 ```php
 <?php
+
+declare(strict_types=1);
+
 namespace Symphony\Console\Commands\Workspace;
 
-use Symphony\Console as Console;
+use Symphony\Console;
 use pointybeard\Helpers\Cli;
+use pointybeard\Helpers\Cli\Input;
 
 class Test extends Console\AbstractCommand
 {
-    public function __construct() {
-        parent::__construct(
-            "1.0.0", // Version number
-            "a really simple test command", // Description of this command
-            "symphony workspace test" //Optional example of how to use this command
-        );
+    public function __construct()
+    {
+        parent::__construct();
+        $this
+            ->description('a really simple test command')
+            ->version('1.0.0')
+            ->example(
+                'symphony workspace test'
+            )
+        ;
     }
 
-    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
-        (new Cli\Message\Message)
-            ->message("Greetings. This is the test command!")
+        (new Cli\Message\Message())
+            ->message('Greetings. This is the test command!')
             ->display()
         ;
 
         return true;
     }
 }
+
 ```
 
 From within the `execute()` method, you have full access to the Symphony core framework. For example, to get the database object, use `\Symphony::Database()`. Anything you would normally do in an extension, you can do here (e.g. triggering delegates, accessing sections or fields).
 
 ### Requiring Authentication
 
-You can secure your commands so that anyone using it must provide valid Symphony author credentials. To do this, instead of extending `Symphony\Console\AbstractCommand`, extend `Symphony\Console\Lib\AuthenticatedCommand`. When you command is run, Console will notice and force the user to provide a authentication with `-u` or `-t`.
+You can secure your commands so that anyone using it must provide valid Symphony author credentials. To do this, in addition to extending `Symphony\Console\AbstractCommand`, implement the `Symphony\Console\Interfaces\AuthenticatedCommandInterface` interface. When your command is run, Console will notice and force the user to provide a authentication with `-u` or `-t`.
 
-When extending `AuthenticatedCommand`, you must provide an `authenticate()` method in your command. The simplest way is to use the `hasCommandRequiresAuthenticateTrait` trait. It includes a boilerplate `authenticate()` method and generally is more than adequate. It will check if the user is logged in and throw an `AuthenticationFailedException` if not.
+When implementing `AuthenticatedCommandInterface`, you must provide an `authenticate()` method in your command. The simplest way is to use the `hasCommandRequiresAuthenticateTrait` trait. It includes a boilerplate `authenticate()` method and generally is perfectly adequate. It will check if the user is logged in and throw an `AuthenticationFailedException` if not.
 
-Here is the same 'test' command from above, but this time it requires authentication:
+Here is the same 'test.php' command from above, but this time it requires authentication:
 
 ```php
 <?php
+
+declare(strict_types=1);
+
 namespace Symphony\Console\Commands\Workspace;
 
-use Symphony\Console as Console;
+use Symphony\Console;
 use pointybeard\Helpers\Cli;
+use pointybeard\Helpers\Cli\Input;
 
 class Test extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
 {
     use Console\Traits\hasCommandRequiresAuthenticateTrait;
 
-    public function __construct() {
-        parent::__construct(
-            "1.0.0", // Version number
-            "a really simple test command", // Description of this command
-            "symphony workspace test" //Optional example of how to use this command
-        );
+    public function __construct()
+    {
+        parent::__construct();
+        $this
+            ->description('a really simple test command')
+            ->version('1.0.0')
+            ->example(
+                'symphony workspace test'
+            )
+        ;
     }
 
-    public function execute(Console\Interfaces\InputHandlerInterface $input) : bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
-        (new Cli\Message\Message)
-            ->message("Greetings. This is the test command!")
+        (new Cli\Message\Message())
+            ->message('Greetings. This is the test command!')
             ->display()
         ;
 
         return true;
     }
 }
+
 ```
 
 ## Multiple Symphony installations on the same Host
@@ -164,7 +181,7 @@ A solution is to place the Console extension folder outside of the Symphony CMS 
 
 E.g.
 
-One install of Symphony is called banana and another called apple. The same console extension folder, which is in `~/source` is symlink'd accordingly into the `extensions` folder.
+One install of Symphony is called `banana` and another called `apple`. The same Console extension folder, which is in `~/source`, is symlink'd accordingly into the `extensions` folder.
 ```
     ## ln -s ~/source/console /var/www/symphony-banana/extensions/
     SYMPHONY_DOCROOT=/var/www/symphony-banana symphony
@@ -187,7 +204,3 @@ We encourage you to contribute to this project. Please check out the [Contributi
 ## License
 
 "Console Extension for Symphony CMS" is released under the [MIT License](http://www.opensource.org/licenses/MIT).
-
-## Credits
-
-*   Some inspiration taken from the [Symfony Console Component](https://github.com/symfony/console) (although no code has been used).
