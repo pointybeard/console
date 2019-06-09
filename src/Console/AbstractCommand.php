@@ -20,11 +20,6 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     private $bindFlags;
 
-    const VERBOSITY_LEVEL_0 = 0;
-    const VERBOSITY_LEVEL_1 = 1;
-    const VERBOSITY_LEVEL_2 = 2;
-    const VERBOSITY_LEVEL_3 = 3;
-
     protected function __construct(?string $version = null, ?string $description = null, ?string $example = null, ?string $support = null, ?int $bindFlags = null)
     {
         $this
@@ -77,9 +72,13 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                     ->validator(new Input\Validator(
                         function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
                             $isExtensionSet = null !== $context->find('extension');
-                            $commands = CommandAutoloader::fetch();
 
-                            if (empty($commands)) {
+                            $extensions = [];
+                            foreach (new CommandIterator() as [$extension, $command]) {
+                                $extensions[$extension][] = $command;
+                            }
+
+                            if (empty($extensions)) {
                                 (new Cli\Message\Message())
                                     ->message('No commands could be found.')
                                     ->foreground(Cli\Colour\Colour::FG_YELLOW)
@@ -101,9 +100,9 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
                             echo PHP_EOL;
 
-                            foreach (CommandAutoloader::fetch() as $extension => $commands) {
-                                if (!$isExtensionSet || ($isExtensionSet && $context->find('extension') == $extension)) {
-                                    if (!$isExtensionSet) {
+                            foreach ($extensions as $extension => $commands) {
+                                if (false == $isExtensionSet || (true == $isExtensionSet && $context->find('extension') == $extension)) {
+                                    if (false == $isExtensionSet) {
                                         (new Cli\Message\Message())
                                             ->message("* {$extension}")
                                             ->foreground(Cli\Colour\Colour::FG_GREEN)
