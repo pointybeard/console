@@ -212,6 +212,14 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
     public function __toString()
     {
+        $additional = [];
+        if (null !== $this->example()) {
+            $additional['Examples'] = $this->example();
+        }
+        if (null !== $this->support()) {
+            $additional['Support'] = $this->support();
+        }
+
         return Functions\Cli\manpage(
             strtolower($this->name()),
             $this->version(),
@@ -219,10 +227,7 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
             $this->inputCollection,
             Cli\Colour\Colour::FG_GREEN,
             Cli\Colour\Colour::FG_WHITE,
-            [
-                'Examples' => $this->example(),
-                'Support' => $this->support(),
-            ]
+            $additional
         );
     }
 }
