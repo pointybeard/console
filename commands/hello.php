@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Commands\Console;
+namespace pointybeard\Symphony\Extensions\Console\Commands\Console;
 
-use Symphony\Console as Console;
+use pointybeard\Symphony\Extensions\Console as Console;
 use pointybeard\Helpers\Functions\Strings;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;

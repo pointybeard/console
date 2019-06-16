@@ -32,7 +32,7 @@ require realpath(__DIR__ . '/../vendor') . '/autoload.php';
  * Finished setting up Symphony environment. Now commence building
  * the Console environment
  */
-use Symphony\Console as Console;
+use pointybeard\Symphony\Extensions\Console;
 
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Message\Message;

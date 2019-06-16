@@ -1,5 +1,5 @@
 {
-    "name": "pointybeard/symphonycms-console",
+    "name": "pointybeard/symphony-console",
     "description": "SymphonyCMS Extensions that provides access to the Symphony core from the command line.",
     "homepage": "https://github.com/pointybeard/console",
     "license": "MIT",
@@ -22,8 +22,10 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "Symphony\\": "src/",
-            "Symphony\\Console\\Commands\\Console\\": "commands"
-        }
+            "pointybeard\\Symphony\\Extensions\\": "src/"
+        },
+        "files": [
+            "extension.driver.php"
+        ]
     }
 }

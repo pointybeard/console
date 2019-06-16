@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console;
+namespace pointybeard\Symphony\Extensions\Console;
 
 final class CommandIterator extends \RegexIterator
 {

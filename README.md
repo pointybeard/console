@@ -1,7 +1,7 @@
 # Console Extension for Symphony CMS
 
--   Version: 1.0.1
--   Date: June 09 2019
+-   Version: 1.1.0
+-   Date: June 17 2019
 -   [Release notes](https://github.com/pointybeard/console/blob/master/CHANGELOG.md)
 -   [GitHub repository](https://github.com/pointybeard/console)
 
@@ -77,9 +77,9 @@ Some commands may require you are authenticated before you use them. To do this,
 
 ## Writing a custom command
 
-To write a command, create a class that extends `Symphony\Console\AbstractCommand` and place it into `workspace/commands/`. Alternatively, put it into the `commands/` folder of any Extension.
+To write a command, create a class that extends `pointybeard\Symphony\Extensions\Console\AbstractCommand` and place it into `workspace/commands/`. Alternatively, put it into the `commands/` folder of any Extension.
 
-Any command you write must have a namespace starting with `Symphony\Console\Commands\` followed by the name of your extension (e.g. `namespace Symphony\Console\Commands\MyExtension`) or `workspace` (i.e. `namespace Symphony\Console\Commands\Workspace`).
+Any command you write must have a namespace starting with `pointybeard\Symphony\Extensions\Console\Commands\` followed by the name of your extension (e.g. `namespace pointybeard\Symphony\Extensions\Console\Commands\MyExtension`) or `workspace` (i.e. `namespace pointybeard\Symphony\Extensions\Console\Commands\Workspace`).
 
 Here is an example of a very basic Command called `test.php` placed in `workspace/commands/`:
 
@@ -88,9 +88,9 @@ Here is an example of a very basic Command called `test.php` placed in `workspac
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Commands\Workspace;
+namespace pointybeard\Symphony\Extensions\Console\Commands\Workspace;
 
-use Symphony\Console;
+use pointybeard\Symphony\Extensions\Console;
 use pointybeard\Helpers\Cli;
 use pointybeard\Helpers\Cli\Input;
 
@@ -125,7 +125,7 @@ From within the `execute()` method, you have full access to the Symphony core fr
 
 ### Requiring Authentication
 
-You can secure your commands so that anyone using it must provide valid Symphony author credentials. To do this, in addition to extending `Symphony\Console\AbstractCommand`, implement the `Symphony\Console\Interfaces\AuthenticatedCommandInterface` interface. When your command is run, Console will notice and force the user to provide a authentication with `-u` or `-t`.
+You can secure your commands so that anyone using it must provide valid Symphony author credentials. To do this, in addition to extending `pointybeard\Symphony\Extensions\Console\AbstractCommand`, implement the `pointybeard\Symphony\Extensions\Console\Interfaces\AuthenticatedCommandInterface` interface. When your command is run, Console will notice and force the user to provide a authentication with `-u` or `-t`.
 
 When implementing `AuthenticatedCommandInterface`, you must provide an `authenticate()` method in your command. The simplest way is to use the `hasCommandRequiresAuthenticateTrait` trait. It includes a boilerplate `authenticate()` method and generally is perfectly adequate. It will check if the user is logged in and throw an `AuthenticationFailedException` if not.
 
@@ -136,9 +136,9 @@ Here is the same 'test.php' command from above, but this time it requires authen
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Commands\Workspace;
+namespace pointybeard\Symphony\Extensions\Console\Commands\Workspace;
 
-use Symphony\Console;
+use pointybeard\Symphony\Extensions\Console;
 use pointybeard\Helpers\Cli;
 use pointybeard\Helpers\Cli\Input;
 

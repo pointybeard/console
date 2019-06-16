@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Commands\Console;
+namespace pointybeard\Symphony\Extensions\Console\Commands\Console;
 
-use Symphony\Console as Console;
+use pointybeard\Symphony\Extensions\Console as Console;
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Cli\Message\Message;

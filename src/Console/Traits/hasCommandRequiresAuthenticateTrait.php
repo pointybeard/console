@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Traits;
+namespace pointybeard\Symphony\Extensions\Console\Traits;
 
-use Symphony\Console as Console;
+use pointybeard\Symphony\Extensions\Console as Console;
 
 trait hasCommandRequiresAuthenticateTrait
 {

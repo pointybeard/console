@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Exceptions;
+namespace pointybeard\Symphony\Extensions\Console\Exceptions;
 
 use Extension as SymphonyExtension;
 

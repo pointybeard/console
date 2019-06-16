@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console;
+namespace pointybeard\Symphony\Extensions\Console;
 
 final class CommandAutoloader
 {
@@ -28,7 +28,10 @@ final class CommandAutoloader
         // folder
         spl_autoload_register(function ($class) {
             if (!preg_match_all(
-                '/^Symphony\\\\Console\\\\Commands\\\\([^\\\\]+)\\\\(.+)$/i',
+                sprintf(
+                    '@%s\\\\Commands\\\\([^\\\\]+)\\\\(.+)$@i',
+                    preg_quote(__NAMESPACE__)
+                ),
                 $class,
                 $matches
             )) {
@@ -77,12 +80,12 @@ final class CommandAutoloader
                 $extension
             );
 
-            if (is_readable("{$path}/extension.driver.php")) {
-                require_once "{$path}/extension.driver.php";
+            if (is_readable($path.'/extension.driver.php')) {
+                require_once $path.'/extension.driver.php';
             }
 
-            if (is_readable("{$path}/vendor/autoload.php")) {
-                require_once "{$path}/vendor/autoload.php";
+            if (is_readable($path.'/vendor/autoload.php')) {
+                require_once $path.'/vendor/autoload.php';
             }
         });
 

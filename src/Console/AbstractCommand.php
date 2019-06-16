@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console;
+namespace pointybeard\Symphony\Extensions\Console;
 
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Functions;

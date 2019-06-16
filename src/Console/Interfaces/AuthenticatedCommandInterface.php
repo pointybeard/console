@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Interfaces;
+namespace pointybeard\Symphony\Extensions\Console\Interfaces;
 
 interface AuthenticatedCommandInterface
 {
