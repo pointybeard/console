@@ -4,6 +4,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 **View all [Unreleased][] changes here**
 
+## [1.1.1][]
+#### Changed
+-   Removed `extension.driver.php` from autoload
+-   Setting `CWD` to `DOCROOT` in `bin\symphony` to avoid issues with relative paths
+
 ## [1.1.0][]
 #### Changed
 -   Updated namespace from `Symphony\Console` to `pointybeard\Symphony\Extensions\Console` in efforts to standardise namespaces across multiple projects
@@ -28,6 +33,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -   Initial release
 
 [Unreleased]: https://github.com/pointybeard/console/compare/1.1.0...integration
+[1.1.1]: https://github.com/pointybeard/console/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/pointybeard/console/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/pointybeard/console/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/pointybeard/console/compare/0.1.0...1.0.0

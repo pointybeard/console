@@ -1,7 +1,7 @@
 # Console Extension for Symphony CMS
 
--   Version: 1.1.0
--   Date: June 17 2019
+-   Version: 1.1.1
+-   Date: Aug 06 2019
 -   [Release notes](https://github.com/pointybeard/console/blob/master/CHANGELOG.md)
 -   [GitHub repository](https://github.com/pointybeard/console)
 
