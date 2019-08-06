@@ -12,8 +12,6 @@ if (!file_exists(__DIR__.'/vendor/autoload.php')) {
 
 require_once __DIR__.'/vendor/autoload.php';
 
-// This file is included automatically in the composer autoloader, however,
-// Symphony might try to include it again which would cause a fatal error.
 // Check if the class already exists before declaring it again.
 if (!class_exists('\\Extension_Console')) {
     class Extension_Console extends Extension

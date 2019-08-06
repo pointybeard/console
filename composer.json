@@ -23,9 +23,6 @@
     "autoload": {
         "psr-4": {
             "pointybeard\\Symphony\\Extensions\\": "src/"
-        },
-        "files": [
-            "extension.driver.php"
-        ]
+        }
     }
 }
