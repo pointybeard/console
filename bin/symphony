@@ -13,6 +13,9 @@ define(
         : realpath(dirname(__FILE__) . '/../../..')
 );
 
+// Propagate the DOCROOT value by setting it as CWD
+chdir(DOCROOT);
+
 define('DOMAIN', null);
 
 // Emulate HTTP_HOST so defines.php doesn't throw a notice
