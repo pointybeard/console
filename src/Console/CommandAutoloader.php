@@ -41,23 +41,55 @@ final class CommandAutoloader
             $extension = $matches[1][0];
             $command = $matches[2][0];
 
+            $filepaths = [];
+
             if (0 == strcasecmp($extension, 'workspace')) {
-                $file = sprintf(
+                $filepaths[] = sprintf(
                     '%s/commands/%s.php',
                     WORKSPACE,
-                    $command
+                    ucfirst($command)
+                );
+
+                $filepaths[] = sprintf(
+                    '%s/commands/%s.php',
+                    WORKSPACE,
+                    strtolower($command)
                 );
             } else {
-                $file = sprintf(
+                $filepaths[] = sprintf(
                     '%s/%s/commands/%s.php',
                     EXTENSIONS,
-                    $extension,
-                    $command
+                    ucfirst($extension),
+                    ucfirst($command)
+                );
+
+                $filepaths[] = sprintf(
+                    '%s/%s/commands/%s.php',
+                    EXTENSIONS,
+                    strtolower($extension),
+                    strtolower($command)
+                );
+
+                $filepaths[] = sprintf(
+                    '%s/%s/commands/%s.php',
+                    EXTENSIONS,
+                    ucfirst($extension),
+                    strtolower($command)
+                );
+
+                $filepaths[] = sprintf(
+                    '%s/%s/commands/%s.php',
+                    EXTENSIONS,
+                    strtolower($extension),
+                    ucfirst($command)
                 );
             }
 
-            if (is_readable($file)) {
-                require_once $file;
+            foreach ($filepaths as $file) {
+                if (is_readable($file)) {
+                    require_once $file;
+                    break;
+                }
             }
         });
 
