@@ -9,6 +9,11 @@ use pointybeard\Helpers\Functions;
 use pointybeard\Helpers\Cli;
 use pointybeard\Helpers\Exceptions\ReadableTrace;
 
+// Create a new error reporting constant.
+if (!defined('E_CRITICAL')) {
+    define('E_CRITICAL', 0x0000);
+}
+
 abstract class AbstractCommand implements Interfaces\CommandInterface
 {
     private $description;
@@ -19,6 +24,16 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
     private $inputCollection;
 
     private $bindFlags;
+
+    // E_CRITICAL (0) : default when -v, -vv, or -vvv is not set
+    // E_ERROR (1) : -v
+    // E_WARNING (2) : -vv
+    // E_NOTICE (8) : -vvv
+    // E_ALL (32767) : -vvv
+    public const VERBOSITY_LEVEL_0 = E_CRITICAL;
+    public const VERBOSITY_LEVEL_1 = self::VERBOSITY_LEVEL_0 | E_ERROR;
+    public const VERBOSITY_LEVEL_2 = self::VERBOSITY_LEVEL_1 | E_WARNING;
+    public const VERBOSITY_LEVEL_3 = E_ALL;
 
     protected function __construct(?string $version = null, ?string $description = null, ?string $example = null, ?string $support = null, ?int $bindFlags = null)
     {
@@ -161,9 +176,21 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                     ->validator(new Input\Validator(
                         function (Input\AbstractInputType $input, Input\AbstractInputHandler $context) {
                             // Make sure verbosity level never goes above 3
-                            return min(3, (int) $context->find('v'));
+                            $verbosity = min(3, (int) $context->find('v'));
+
+                            if (0 == $verbosity) {
+                                return self::VERBOSITY_LEVEL_0;
+                            } elseif (1 == $verbosity) {
+                                return self::VERBOSITY_LEVEL_1;
+                            } elseif (2 == $verbosity) {
+                                return self::VERBOSITY_LEVEL_2;
+                            } elseif (3 == $verbosity) {
+                                return self::VERBOSITY_LEVEL_3;
+                            }
                         }
                     ))
+                    // Default to only showing critical messages
+                    ->default(self::VERBOSITY_LEVEL_0)
             )
         ;
     }
