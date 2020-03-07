@@ -10,15 +10,20 @@ use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Prompt\Prompt;
+use pointybeard\Helpers\Foundation\BroadcastAndListen;
 
 class Symphony extends Console\AbstractCommand
 {
+    public const BROADCAST_MESSAGE = 'broadcast message';
+
+    private $verbosity = null;
+
     public function __construct()
     {
         parent::__construct();
         $this
             ->description('Runs command provided via extension or workspace')
-            ->version('1.0.1')
+            ->version('1.0.2')
             ->example(
                 'symphony --list'.PHP_EOL.
                 'symphony -t 4141e465 console hello --usage'.PHP_EOL.
@@ -161,6 +166,49 @@ class Symphony extends Console\AbstractCommand
         ;
     }
 
+    public function notificationFromCommand($type, ...$arguments): void
+    {
+        // If the type isnt self::BROADCAST_MESSAGE then return right away
+        if (self::BROADCAST_MESSAGE != $type) {
+            return;
+        }
+
+        // Since this is a BROADCAST_MESSAGE, we expect to get a minimum
+        // verbosity trigger level, a message (this can either be a string
+        // or an instance of \pointybeard\Helpers\Cli\Message\Message), and
+        // finally an optional target output (STDOUT or STDERR generally)
+
+        // Since target is optional, check if it was set by looking at how many
+        // items are in $arguments. Anything fewer than 4 means we don't have
+        // a target set.
+        if (count($arguments) < 4) {
+            $arguments[] = null;
+        }
+
+        [$initiator, $trigger, $message, $target] = $arguments;
+
+        // Check the message type against the commands verbosity level
+        // E.g. (E_NOTICE & E_ERROR) == E_NOTICE
+        if (!(($trigger & $this->verbosity) == $trigger)) {
+            return;
+        }
+
+        // Assume that, if target isn't set, that E_ERROR should go to
+        // STDERR instead of STDOUT
+        if ((E_ERROR & E_CRITICAL) == $trigger && null == $target) {
+            $target = STDERR;
+        } elseif (null == $target) {
+            $target = STDOUT;
+        }
+
+        // Message object has come through
+        if (!($message instanceof Message)) {
+            $message = (new Message($message));
+        }
+
+        $message->display($target);
+    }
+
     public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
         // Use $input to figure out what command we are running. Both
@@ -170,6 +218,11 @@ class Symphony extends Console\AbstractCommand
             $input->find('extension'),
             $input->find('command')
         );
+
+        // Add a listener so we can display messages if the command broadcasts
+        if ($command instanceof BroadcastAndListen\Interfaces\AcceptsListenersInterface) {
+            $command->addListener([$this, 'notificationFromCommand']);
+        }
 
         try {
             // Combine input collections from this command
@@ -185,6 +238,10 @@ class Symphony extends Console\AbstractCommand
             echo Colour::colourise("symphony: {$ex->getMessage()}", Colour::FG_RED).PHP_EOL.$command->usage().PHP_EOL.PHP_EOL.'Try `-h` for more options.'.PHP_EOL;
             exit(1);
         }
+
+        // Set the internal $verbosity flag as this is needed in the
+        // notificationFromCommand() broadcast listener
+        $this->verbosity = $input->find('v');
 
         if ($command instanceof Console\Interfaces\AuthenticatedCommandInterface) {
             $command->authenticate();
