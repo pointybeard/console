@@ -9,15 +9,19 @@ use pointybeard\Helpers\Functions\Strings;
 use pointybeard\Helpers\Cli\Message\Message;
 use pointybeard\Helpers\Cli\Colour\Colour;
 use pointybeard\Helpers\Cli\Input;
+use pointybeard\Helpers\Foundation\BroadcastAndListen;
 
-class Hello extends Console\AbstractCommand
+class Hello extends Console\AbstractCommand implements BroadcastAndListen\Interfaces\AcceptsListenersInterface
 {
+    use BroadcastAndListen\Traits\HasListenerTrait;
+    use BroadcastAndListen\Traits\HasBroadcasterTrait;
+
     public function __construct()
     {
         parent::__construct();
         $this
             ->description('echoes all arguments, options, and flags')
-            ->version('1.0.1')
+            ->version('1.0.2')
             ->example(
                 'symphony console hello -a 123 --bravo=456'
             )
@@ -34,7 +38,6 @@ class Hello extends Console\AbstractCommand
             ->background(Colour::BG_BLUE)
             ->display()
         ;
-
         echo PHP_EOL;
 
         $count = 0;
@@ -97,6 +100,52 @@ class Hello extends Console\AbstractCommand
                 ->display()
             ;
         }
+
+        echo PHP_EOL;
+
+        (new Message('VERBOSITY'))
+            ->foreground(Colour::FG_GREEN)
+            ->display()
+        ;
+
+        (new Message('Change the verbosity level flag (-v, -vv, -vvv) to limit what is shown'))
+            ->display()
+        ;
+
+        echo PHP_EOL;
+
+        $this->broadcast(
+            Symphony::BROADCAST_MESSAGE,
+            E_CRITICAL,
+            (new Message())
+                ->message('CRITICAL (-v or not set at all)')
+                ->foreground(Colour::FG_WHITE)
+                ->background(Colour::BG_RED),
+            STDERR
+        );
+
+        $this->broadcast(
+            Symphony::BROADCAST_MESSAGE,
+            E_ERROR,
+            (new Message())
+                ->message('ERROR (-v)')
+                ->foreground(Colour::FG_RED)
+        );
+
+        $this->broadcast(
+            Symphony::BROADCAST_MESSAGE,
+            E_WARNING,
+            (new Message())
+                ->message('WARNING (-vv)')
+                ->foreground(Colour::FG_YELLOW)
+        );
+
+        $this->broadcast(
+            Symphony::BROADCAST_MESSAGE,
+            E_NOTICE,
+            (new Message())
+                ->message('NOTICE (-vvv)')
+        );
 
         echo PHP_EOL;
 
