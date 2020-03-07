@@ -41,7 +41,7 @@ class ExceptionHandler
                     $ex->getFile(),
                     $ex->getLine(),
                     $ex->getMessage(),
-                    ),
+                ),
                 sprintf('[%s]', (new \ReflectionClass($ex))->getName()),
                 Colour::BG_RED,
                 $ex->getPrevious() instanceof \Exception
