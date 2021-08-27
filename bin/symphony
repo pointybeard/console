@@ -56,6 +56,13 @@ require realpath(DOCROOT . '/vendor') . '/autoload.php';
 require DOCROOT . '/symphony/lib/boot/bundle.php';
 
 Console\Console::initialise();
+
+// Attempt to register the Console as the Symphony Engine object
+// Note, this requires SymphonyCMS (Extended) <https://github.com/pointybeard/symphonycms>
+if(true == method_exists(Symphony::class, 'registerEngineInstance')) {
+    Symphony::registerEngineInstance(Console\Console::instance());
+}
+
 $command = Console\CommandFactory::build('console', 'symphony');
 
 try{
