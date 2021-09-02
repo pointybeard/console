@@ -10,15 +10,10 @@ use pointybeard\Helpers\Cli\Colour\Colour;
 class ExceptionHandler
 {
     public static $enabled = true;
-    private static $log = null;
 
     public static function initialise($Log = NULL)
     {
         self::$enabled = true;
-
-        if (null !== $log) {
-            self::$log = $log;
-        }
 
         // Symphony's exception handler is set twice so we need to call
         // restore_error_handler() twice to clear it out.
