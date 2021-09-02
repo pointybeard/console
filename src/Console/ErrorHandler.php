@@ -21,7 +21,7 @@ class ErrorHandler extends GenericErrorHandler
      * Initialise will set the error handler to be the `__CLASS__::handler`
      * function.
      */
-    public static function initialise(?\Log $Log = null)
+    public static function initialise($Log = NULL)
     {
         if (null !== $Log) {
             self::$_Log = $Log;

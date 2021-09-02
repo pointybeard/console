@@ -12,7 +12,7 @@ class ExceptionHandler
     public static $enabled = true;
     private static $log = null;
 
-    public static function initialise(?\Log $log = null)
+    public static function initialise($Log = NULL)
     {
         self::$enabled = true;
 
