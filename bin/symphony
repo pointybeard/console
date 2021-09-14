@@ -44,7 +44,7 @@ use pointybeard\Helpers\Cli\Prompt\Prompt;
 use pointybeard\Helpers\Functions\Cli;
 
 // Make sure the DOCROOT folder seems okay
-if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
+if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php') && !file_exists(DOCROOT . '/src/Symphony/Symphony.php')) {
     Cli\display_error_and_exit(sprintf(
         "DOCROOT is set to \"%s\" but there doesn't appear to be an install of Symphony CMS at that location. Did you try setting it using \$SYMPHONY_DOCROOT?",
         DOCROOT
@@ -53,7 +53,12 @@ if (!file_exists(DOCROOT . '/symphony/lib/core/class.symphony.php')) {
 
 // Include the symphony boot script:
 require realpath(DOCROOT . '/vendor') . '/autoload.php';
-require DOCROOT . '/symphony/lib/boot/bundle.php';
+
+if(true == file_exists(DOCROOT . '/symphony/lib/boot/bundle.php')) {
+    require DOCROOT . '/symphony/lib/boot/bundle.php';
+} else {
+    require DOCROOT . '/src/Includes/Boot.php';
+}
 
 Console\Console::initialise();
 
