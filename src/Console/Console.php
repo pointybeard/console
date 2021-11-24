@@ -79,12 +79,12 @@ class Console extends \Symphony
     /**
      * Convienence method for displaying a warning (yellow text).
      */
-    public static function displayWarning(string $message): int
+    public static function displayWarning(string $message): void
     {
-        $result = (new Message())
+        $result = (new Message\Message())
             ->message("WARNING: {$message}")
-            ->foreground(Message::FG_COLOUR_YELLOW)
-            ->flags(Message::FLAG_APPEND_NEWLINE)
+            ->foreground(Colour\Colour::FG_YELLOW)
+            ->flags(Message\Message::FLAG_APPEND_NEWLINE)
             ->display()
         ;
     }
