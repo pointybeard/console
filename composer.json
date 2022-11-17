@@ -22,7 +22,8 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "pointybeard\\Symphony\\Extensions\\": "src/"
+            "pointybeard\\Symphony\\Extensions\\": "src/",
+            "pointybeard\\Symphony\\Extensions\\Console\\Commands\\Console\\": "commands/"
         }
     }
 }
