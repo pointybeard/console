@@ -115,6 +115,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
 
                             echo PHP_EOL;
 
+                            ksort($extensions);
+
                             foreach ($extensions as $extension => $commands) {
                                 if (false == $isExtensionSet || (true == $isExtensionSet && $context->find('extension') == $extension)) {
                                     if (false == $isExtensionSet) {
@@ -124,6 +126,8 @@ abstract class AbstractCommand implements Interfaces\CommandInterface
                                             ->display()
                                         ;
                                     }
+
+                                    sort($commands);
 
                                     foreach ($commands as $c) {
                                         (new Cli\Message\Message())
